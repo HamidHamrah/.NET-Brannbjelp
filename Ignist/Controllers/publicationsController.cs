@@ -61,7 +61,6 @@ namespace Ignist.Controllers
                 return NotFound("Publication not found.");
             dbPublication.Tittle = updatedpublication.Tittle;
             dbPublication.Contetn = updatedpublication.Contetn;
-            dbPublication.CreatedAT = updatedpublication.CreatedAT;
             dbPublication.UpdatedAt = updatedpublication.UpdatedAt;
             await _DataContext.SaveChangesAsync();
 
