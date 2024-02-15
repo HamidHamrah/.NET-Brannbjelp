@@ -1,38 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Ignist.Models;
 using Ignist.Data;
-using Microsoft.EntityFrameworkCore;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using Microsoft.Azure.Cosmos;
 
 namespace Ignist.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class publicationsController : ControllerBase
+    public class PublicationsController : ControllerBase // Endret til stor 'P' i navnet for konvensjonens skyld
     {
-        private readonly DataContext _DataContext;
-        public publicationsController(DataContext dataContext)
+        private readonly IPublicationsRepository _publicationsRepository;
+
+        public PublicationsController(IPublicationsRepository publicationsRepository)
         {
-            _DataContext = dataContext;
+            _publicationsRepository = publicationsRepository;
         }
-        //Get all Publications
+
+        // Get all Publications
         [HttpGet]
-        public async Task<ActionResult<List<publications>>> GetAllPublications()
+        public async Task<ActionResult<List<Publication>>> GetAllPublications()
         {
-            var publications = await _DataContext.publications.ToListAsync();
+            var publications = await _publicationsRepository.GetAllPublicationsAsync();
             return Ok(publications);
         }
 
         // Finding a publication with the specific Id
         [HttpGet("{id}")]
-        public async Task<ActionResult<publications>> GetPublication(int id)
+        public async Task<ActionResult<Publication>> GetPublication(string id, [FromQuery] string UserId) // Endret til string fordi Cosmos DB bruker string IDs
         {
-            var publication = await _DataContext.publications.FindAsync(id);
+            var publication = await _publicationsRepository.GetPublicationByIdAsync(id, UserId);
             if (publication is null)
             {
                 return NotFound("Publication not found.");
@@ -41,46 +39,43 @@ namespace Ignist.Controllers
             return Ok(publication);
         }
 
+
         //Creating new Publications
         [HttpPost]
-        public async Task<ActionResult<publications>> AddPublication(publications publication)
+        public async Task<ActionResult<Publication>> AddPublication(Publication publication)
         {
-            _DataContext.publications.Add(publication);
-            await _DataContext.SaveChangesAsync();
-
-            return Ok(await _DataContext.publications.ToListAsync());
+            await _publicationsRepository.AddPublicationAsync(publication);
+            return CreatedAtAction(nameof(GetPublication), new { id = publication.Id }, publication);
         }
 
-        //Updating an Uplication
-
-        [HttpPut]
-        public async Task<ActionResult<publications>> UpdatePublication(publications updatedpublication)
+        // Updating a Publication
+        [HttpPut("{id}")]
+        public async Task<ActionResult<Publication>> UpdatePublication(string id, Publication updatedPublication)
         {
-            var dbPublication = await _DataContext.publications.FindAsync(updatedpublication.Id);
-            if (dbPublication is null)
+            try
+            {
+                await _publicationsRepository.UpdatePublicationAsync(updatedPublication);
+                return NoContent();
+            }
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
                 return NotFound("Publication not found.");
-            dbPublication.Tittle = updatedpublication.Tittle;
-            dbPublication.Contetn = updatedpublication.Contetn;
-            dbPublication.UpdatedAt = updatedpublication.UpdatedAt;
-            await _DataContext.SaveChangesAsync();
-
-            return Ok(await _DataContext.publications.ToListAsync());
+            }
         }
 
         // Deleting a publication
-
-        [HttpDelete]
-        public async Task<ActionResult<publications>>  DeletPublication(int Id)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePublication(string id, [FromQuery] string UserId)
         {
-            var dbPublication = await _DataContext.publications.FindAsync(Id);
-            if (dbPublication is null)
+            try
+            {
+                await _publicationsRepository.DeletePublicationAsync(id, UserId);
+                return NoContent();
+            }
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
                 return NotFound("Publication not found.");
-            _DataContext.publications.Remove(dbPublication);
-
-            await _DataContext.SaveChangesAsync();
-
-            return Ok(await _DataContext.publications.ToListAsync());
+            }
         }
     }
 }
-

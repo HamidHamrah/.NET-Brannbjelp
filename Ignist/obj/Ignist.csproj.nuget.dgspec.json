@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/Users/hamid/Desktop/Ignist/Ignist/Ignist.csproj": {}
+    "/Users/zulfeqarshiorzadeh/Desktop/Ignist/Ignist/Ignist.csproj": {}
   },
   "projects": {
-    "/Users/hamid/Desktop/Ignist/Ignist/Ignist.csproj": {
+    "/Users/zulfeqarshiorzadeh/Desktop/Ignist/Ignist/Ignist.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/hamid/Desktop/Ignist/Ignist/Ignist.csproj",
+        "projectUniqueName": "/Users/zulfeqarshiorzadeh/Desktop/Ignist/Ignist/Ignist.csproj",
         "projectName": "Ignist",
-        "projectPath": "/Users/hamid/Desktop/Ignist/Ignist/Ignist.csproj",
-        "packagesPath": "/Users/hamid/.nuget/packages/",
-        "outputPath": "/Users/hamid/Desktop/Ignist/Ignist/obj/",
+        "projectPath": "/Users/zulfeqarshiorzadeh/Desktop/Ignist/Ignist/Ignist.csproj",
+        "packagesPath": "/Users/zulfeqarshiorzadeh/.nuget/packages/",
+        "outputPath": "/Users/zulfeqarshiorzadeh/Desktop/Ignist/Ignist/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/hamid/.nuget/NuGet/NuGet.Config"
+          "/Users/zulfeqarshiorzadeh/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -40,25 +40,33 @@
           "dependencies": {
             "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[8.0.1, )"
+              "version": "[8.0.2, )"
+            },
+            "Microsoft.Azure.Cosmos": {
+              "target": "Package",
+              "version": "[3.38.1, )"
             },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
-              "version": "[8.0.1, )"
+              "version": "[8.0.2, )"
             },
             "Microsoft.EntityFrameworkCore.Design": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
               "target": "Package",
-              "version": "[8.0.1, )"
+              "version": "[8.0.2, )"
             },
             "Microsoft.EntityFrameworkCore.Sqlite": {
               "target": "Package",
-              "version": "[8.0.1, )"
+              "version": "[8.0.2, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
-              "version": "[6.4.0, )"
+              "version": "[6.5.0, )"
             }
           },
           "imports": [
