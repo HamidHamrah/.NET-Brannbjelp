@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/Users/zulfeqarshiorzadeh/Desktop/Ignist/Ignist/Ignist.csproj": {}
+    "/Users/hamid/Downloads/ferdig conect cosmos/Ignist/Ignist.csproj": {}
   },
   "projects": {
-    "/Users/zulfeqarshiorzadeh/Desktop/Ignist/Ignist/Ignist.csproj": {
+    "/Users/hamid/Downloads/ferdig conect cosmos/Ignist/Ignist.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/zulfeqarshiorzadeh/Desktop/Ignist/Ignist/Ignist.csproj",
+        "projectUniqueName": "/Users/hamid/Downloads/ferdig conect cosmos/Ignist/Ignist.csproj",
         "projectName": "Ignist",
-        "projectPath": "/Users/zulfeqarshiorzadeh/Desktop/Ignist/Ignist/Ignist.csproj",
-        "packagesPath": "/Users/zulfeqarshiorzadeh/.nuget/packages/",
-        "outputPath": "/Users/zulfeqarshiorzadeh/Desktop/Ignist/Ignist/obj/",
+        "projectPath": "/Users/hamid/Downloads/ferdig conect cosmos/Ignist/Ignist.csproj",
+        "packagesPath": "/Users/hamid/.nuget/packages/",
+        "outputPath": "/Users/hamid/Downloads/ferdig conect cosmos/Ignist/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/zulfeqarshiorzadeh/.nuget/NuGet/NuGet.Config"
+          "/Users/hamid/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
