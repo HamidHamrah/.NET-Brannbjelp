@@ -52,7 +52,23 @@ namespace Ignist.Data
                 return null;
             }
         }
+        //Hamid
+        public async Task<Publication> GetLastPublicationAsync()
+        {
+            var query = _publicationContainer.GetItemLinqQueryable<Publication>()
+                        .OrderByDescending(p => p.CreatedAt)
+                        .Take(1);
 
+            var iterator = query.ToFeedIterator();
+            if (iterator.HasMoreResults)
+            {
+                var response = await iterator.ReadNextAsync();
+                return response.FirstOrDefault();
+            }
+
+            return null;
+        }
+        //
         public async Task AddPublicationAsync(Publication publication)
         {
             await _publicationContainer.CreateItemAsync(publication, new PartitionKey(publication.UserId));

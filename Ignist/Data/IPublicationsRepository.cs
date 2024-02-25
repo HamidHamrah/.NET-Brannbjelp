@@ -12,5 +12,6 @@ namespace Ignist.Data
         Task AddPublicationAsync(Publication publication);
         Task UpdatePublicationAsync(Publication publication);
         Task DeletePublicationAsync(string id, string UserId);
+        Task<Publication> GetLastPublicationAsync();
     }
 }
