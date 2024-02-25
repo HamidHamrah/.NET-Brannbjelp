@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "OqizUkxURB6eTE/gsrxSzbJWlOtJC2DC2jQe/elUW7pWvcwmKRATIVrbRQ60NVtoLnxg00b8AFLHnCvAedS/sg==",
+  "dgSpecHash": "0p0xOFnOSdxWx3D4ie8HAMAe2TTmdSPAOlqmyirm1to4qm42sHPgFot6ErbtdV4iaU+v0PQrFQuRGREKRh58nQ==",
   "success": true,
-  "projectFilePath": "/Users/hamid/Downloads/ferdig conect cosmos/Ignist/Ignist.csproj",
+  "projectFilePath": "/Users/hamid/Desktop/Ignist-Backend/Ignist/Ignist.csproj",
   "expectedPackageFiles": [
     "/Users/hamid/.nuget/packages/azure.core/1.19.0/azure.core.1.19.0.nupkg.sha512",
     "/Users/hamid/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",

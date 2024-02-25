@@ -3980,11 +3980,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/hamid/Downloads/ferdig conect cosmos/Ignist/Ignist.csproj",
+      "projectUniqueName": "/Users/hamid/Desktop/Ignist-Backend/Ignist/Ignist.csproj",
       "projectName": "Ignist",
-      "projectPath": "/Users/hamid/Downloads/ferdig conect cosmos/Ignist/Ignist.csproj",
+      "projectPath": "/Users/hamid/Desktop/Ignist-Backend/Ignist/Ignist.csproj",
       "packagesPath": "/Users/hamid/.nuget/packages/",
-      "outputPath": "/Users/hamid/Downloads/ferdig conect cosmos/Ignist/obj/",
+      "outputPath": "/Users/hamid/Desktop/Ignist-Backend/Ignist/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/hamid/.nuget/NuGet/NuGet.Config"

@@ -22,7 +22,7 @@ namespace Ignist.Data
             this.cosmosClient = cosmosClient;
             this.configuration = configuration;
             var databaseName = configuration["CosmosDbSettings:DatabaseName"];
-            var containerName = "LearnSmart";
+            var containerName = "Hamud";
             _publicationContainer = cosmosClient.GetContainer(databaseName, containerName);
         }
 
