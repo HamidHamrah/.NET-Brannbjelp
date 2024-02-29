@@ -28,46 +28,46 @@ namespace Ignist.Data
 
         public async Task<IEnumerable<Publication>> GetAllPublicationsAsync()
         {
-            var query = _publicationContainer.GetItemLinqQueryable<Publication>(true)
-                        .ToFeedIterator();
+            var query = _publicationContainer.GetItemLinqQueryable<Publication>(true).ToFeedIterator();
 
             var results = new List<Publication>();
+            var processedIds = new HashSet<string>(); // Keeps track of processed publications to avoid duplicates
+
             while (query.HasMoreResults)
             {
                 var response = await query.ReadNextAsync();
-                results.AddRange(response.ToList());
+                results.AddRange(response);
             }
 
-            // Assuming you adjust your model or handling to fetch child publications
-            foreach (var publication in results)
-            {
-                publication.ChildPublications = await GetChildPublicationsAsync(publication.Id);
-            }
+            // Initialize the hierarchy
+            var publicationsWithHierarchy = InitializeHierarchy(results, processedIds);
 
-            return results;
+            return publicationsWithHierarchy;
         }
-        public async Task<List<Publication>> GetChildPublicationsAsync(string parentId)
-        {
-            // This query filters publications based on the parentId property
-            var query = _publicationContainer.GetItemLinqQueryable<Publication>(true)
-                        .Where(p => p.ParentId == parentId)
-                        .ToFeedIterator();
 
-            var children = new List<Publication>();
-            while (query.HasMoreResults)
+        private List<Publication> InitializeHierarchy(IEnumerable<Publication> publications, HashSet<string> processedIds)
+        {
+            var rootPublications = publications.Where(p => string.IsNullOrEmpty(p.ParentId)).ToList();
+
+            foreach (var root in rootPublications)
             {
-                var response = await query.ReadNextAsync();
-                children.AddRange(response.ToList());
+                BuildHierarchy(root, publications, processedIds);
             }
 
-            // Optionally, recursively fetch children of these children if deeper hierarchy is needed
-            // Be cautious of potential performance impacts with deep recursion
+            return rootPublications;
+        }
+
+        private void BuildHierarchy(Publication current, IEnumerable<Publication> allPublications, HashSet<string> processedIds)
+        {
+            if (!processedIds.Add(current.Id)) // Check if already processed, and skip if true
+                return;
+
+            var children = allPublications.Where(p => p.ParentId == current.Id).ToList();
             foreach (var child in children)
             {
-                child.ChildPublications = await GetChildPublicationsAsync(child.Id);
+                BuildHierarchy(child, allPublications, processedIds); // Recursively build hierarchy for each child
             }
-
-            return children;
+            current.ChildPublications = children; // Set the child publications
         }
 
 
