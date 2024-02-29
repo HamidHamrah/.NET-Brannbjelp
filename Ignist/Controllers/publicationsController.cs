@@ -52,14 +52,31 @@ namespace Ignist.Controllers
             return Ok(publication);
         }
 
-
-        //Creating new Publications
         [HttpPost]
         public async Task<ActionResult<Publication>> AddPublication(Publication publication)
         {
             await _publicationsRepository.AddPublicationAsync(publication);
             return CreatedAtAction(nameof(GetPublication), new { id = publication.Id }, publication);
         }
+
+
+        private async Task AddPublicationRecursive(Publication publication, string parentId = null)
+        {
+            // If a parentId is provided, link the current publication as a child
+            if (parentId != null)
+            {
+                publication.ParentId = parentId; 
+            }
+
+            await _publicationsRepository.AddPublicationAsync(publication);
+
+            // Recursively add each child publication
+            foreach (var childPublication in publication.ChildPublications)
+            {
+                await AddPublicationRecursive(childPublication, publication.Id);
+            }
+        }
+
 
         // Updating a Publication
         [HttpPut("{id}")]

@@ -28,6 +28,10 @@ namespace Ignist.Models
         [JsonProperty(PropertyName = "userId")]
         public string UserId { get; set; }
 
+        [JsonProperty(PropertyName = "parentId")]
+        public string ParentId { get; set; } // Add this property
 
+
+        public List<Publication> ChildPublications { get; set; } = new List<Publication>();
     }
 }

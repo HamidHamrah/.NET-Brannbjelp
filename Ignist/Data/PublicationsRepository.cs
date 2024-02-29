@@ -74,6 +74,7 @@ namespace Ignist.Data
             await _publicationContainer.CreateItemAsync(publication, new PartitionKey(publication.UserId));
         }
 
+
         public async Task UpdatePublicationAsync(Publication publication)
         {
             await _publicationContainer.UpsertItemAsync(publication, new PartitionKey(publication.UserId));
