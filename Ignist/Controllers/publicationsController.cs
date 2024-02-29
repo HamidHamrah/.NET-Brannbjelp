@@ -25,6 +25,7 @@ namespace Ignist.Controllers
             var publications = await _publicationsRepository.GetAllPublicationsAsync();
             return Ok(publications);
         }
+
         //Return the last id
         [HttpGet("last")]
         public async Task<ActionResult<Publication>> GetLastPublication()

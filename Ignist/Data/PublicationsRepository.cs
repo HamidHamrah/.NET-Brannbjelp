@@ -29,7 +29,7 @@ namespace Ignist.Data
         public async Task<IEnumerable<Publication>> GetAllPublicationsAsync()
         {
             var query = _publicationContainer.GetItemLinqQueryable<Publication>(true)
-                .ToFeedIterator();
+                        .ToFeedIterator();
 
             var results = new List<Publication>();
             while (query.HasMoreResults)
@@ -37,8 +37,40 @@ namespace Ignist.Data
                 var response = await query.ReadNextAsync();
                 results.AddRange(response.ToList());
             }
+
+            // Assuming you adjust your model or handling to fetch child publications
+            foreach (var publication in results)
+            {
+                publication.ChildPublications = await GetChildPublicationsAsync(publication.Id);
+            }
+
             return results;
         }
+        public async Task<List<Publication>> GetChildPublicationsAsync(string parentId)
+        {
+            // This query filters publications based on the parentId property
+            var query = _publicationContainer.GetItemLinqQueryable<Publication>(true)
+                        .Where(p => p.ParentId == parentId)
+                        .ToFeedIterator();
+
+            var children = new List<Publication>();
+            while (query.HasMoreResults)
+            {
+                var response = await query.ReadNextAsync();
+                children.AddRange(response.ToList());
+            }
+
+            // Optionally, recursively fetch children of these children if deeper hierarchy is needed
+            // Be cautious of potential performance impacts with deep recursion
+            foreach (var child in children)
+            {
+                child.ChildPublications = await GetChildPublicationsAsync(child.Id);
+            }
+
+            return children;
+        }
+
+
 
         public async Task<Publication> GetPublicationByIdAsync(string id)
         {
