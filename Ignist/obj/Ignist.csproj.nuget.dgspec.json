@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/Users/hamid/Desktop/Ignist-Backend/Ignist/Ignist.csproj": {}
+    "/Users/zulfeqarshiorzadeh/Desktop/Net-Ignist/Ignist/Ignist.csproj": {}
   },
   "projects": {
-    "/Users/hamid/Desktop/Ignist-Backend/Ignist/Ignist.csproj": {
+    "/Users/zulfeqarshiorzadeh/Desktop/Net-Ignist/Ignist/Ignist.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/hamid/Desktop/Ignist-Backend/Ignist/Ignist.csproj",
+        "projectUniqueName": "/Users/zulfeqarshiorzadeh/Desktop/Net-Ignist/Ignist/Ignist.csproj",
         "projectName": "Ignist",
-        "projectPath": "/Users/hamid/Desktop/Ignist-Backend/Ignist/Ignist.csproj",
-        "packagesPath": "/Users/hamid/.nuget/packages/",
-        "outputPath": "/Users/hamid/Desktop/Ignist-Backend/Ignist/obj/",
+        "projectPath": "/Users/zulfeqarshiorzadeh/Desktop/Net-Ignist/Ignist/Ignist.csproj",
+        "packagesPath": "/Users/zulfeqarshiorzadeh/.nuget/packages/",
+        "outputPath": "/Users/zulfeqarshiorzadeh/Desktop/Net-Ignist/Ignist/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/hamid/.nuget/NuGet/NuGet.Config"
+          "/Users/zulfeqarshiorzadeh/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -88,7 +88,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.201/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.101/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
