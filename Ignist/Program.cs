@@ -1,5 +1,10 @@
 ﻿using Ignist.Data;
+using Ignist.Data.Services;
+using System.Text;
 using Microsoft.Azure.Cosmos;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,12 +12,13 @@ var configuration = builder.Configuration;
 
 // Add services to the container.
 
-#region MY Code
+#region cosmosdb tilkobling
+//Test
 
 
 builder.Services.AddSingleton((provider) =>
 {
-    var configuration = provider.GetRequiredService<IConfiguration>(); // Hent konfigurasjonen gjennom provider
+    var configuration = provider.GetRequiredService<IConfiguration>(); 
     var EndpointUri = configuration["CosmosDbSettings:EndpointUri"];
     var PrimaryKey = configuration["CosmosDbSettings:PrimaryKey"];
     var databaseName = configuration["CosmosDbSettings:DatabaseName"];
@@ -20,11 +26,11 @@ builder.Services.AddSingleton((provider) =>
     var cosmosClientOptions = new CosmosClientOptions
     {
         ApplicationName = databaseName,
-        ConnectionMode = ConnectionMode.Gateway // Sett ConnectionMode her
+        ConnectionMode = ConnectionMode.Gateway
     };
     var loggerFactory = LoggerFactory.Create(builder =>
     {
-        builder.AddConsole(); // Legg til manglende semikolon her
+        builder.AddConsole(); 
     });
 
     var cosmosClient = new CosmosClient(EndpointUri, PrimaryKey, cosmosClientOptions);
@@ -35,16 +41,50 @@ builder.Services.AddSingleton((provider) =>
 #endregion
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-//Solving the Cors origin proble(Hamid)
+
 builder.Services.AddCors(publications => publications.AddPolicy("corspolicy", build =>
 {
     build.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
 }));
 
-#region My Code
+
+
+//JWT token Singleton
+builder.Services.AddSingleton<JwtTokenService>(sp =>
+    new JwtTokenService(sp.GetRequiredService<IConfiguration>()));
+
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+#region Authetesering
+builder.Services.AddScoped<ICosmosDbService, CosmosDbService>();
+builder.Services.AddSingleton<PasswordHelper>();
+#endregion
+
+#region Legg til autentiseringstjenester
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"])),
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidIssuer = configuration["Jwt:Issuer"],
+        ValidAudience = configuration["Jwt:Audience"],
+        ClockSkew = TimeSpan.Zero
+    };
+});
+#endregion
+
+
+#region Dette er publication tilkalling
 builder.Services.AddScoped<IPublicationsRepository, PublicationsRepository>();
 #endregion
 
@@ -59,10 +99,10 @@ if (app.Environment.IsDevelopment())
 
 //This for Cors(Hamid)
 app.UseCors("corspolicy"); //Using the Cors to in app
-app.UseHttpsRedirection();
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication(); // ny
 app.UseAuthorization();
 
 app.MapControllers();
