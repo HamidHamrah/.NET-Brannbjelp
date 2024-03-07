@@ -1114,3 +1114,8 @@
 /Users/hamid/Desktop/Net-Ignist/Ignist/bin/Debug/net8.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 /Users/hamid/Desktop/Net-Ignist/Ignist/bin/Debug/net8.0/Microsoft.IdentityModel.Tokens.dll
 /Users/hamid/Desktop/Net-Ignist/Ignist/bin/Debug/net8.0/System.IdentityModel.Tokens.Jwt.dll
+/Users/hamid/Desktop/Net-Ignist/Ignist/bin/Debug/net8.0/Scrutor.dll
+/Users/hamid/Desktop/Net-Ignist/Ignist/bin/Debug/net8.0/Swashbuckle.AspNetCore.Filters.dll
+/Users/hamid/Desktop/Net-Ignist/Ignist/bin/Debug/net8.0/Swashbuckle.AspNetCore.Filters.Abstractions.dll
+/Users/hamid/Desktop/Net-Ignist/Ignist/bin/Debug/net8.0/Microsoft.AspNetCore.Authorization.dll
+/Users/hamid/Desktop/Net-Ignist/Ignist/bin/Debug/net8.0/Microsoft.AspNetCore.Metadata.dll

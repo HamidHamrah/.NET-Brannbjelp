@@ -46,8 +46,7 @@ namespace Ignist.Controllers
                     Id = Guid.NewGuid().ToString(),
                     UserName = registerModel.UserName,
                     Email = registerModel.Email,
-                    PasswordHash = _passwordHelper.HashPassword(registerModel.Password),
-                    Roles = new List<string> { "User" }
+                    PasswordHash = _passwordHelper.HashPassword(registerModel.Password)
                 };
 
                 await _cosmosDbService.AddUserAsync(user);
@@ -89,7 +88,7 @@ namespace Ignist.Controllers
 
             // Generer JWT-token
             var token = _jwtTokenService.GenerateToken(user);
-            return Ok(new { token = token });
+            return Ok(new {token});
         }
 
     }

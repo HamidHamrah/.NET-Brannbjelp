@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Threading.Tasks;
 using Ignist.Models;
 
@@ -15,3 +16,4 @@ namespace Ignist.Data
         Task<Publication> GetLastPublicationAsync();
     }
 }
+

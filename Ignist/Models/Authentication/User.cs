@@ -17,9 +17,8 @@ namespace Ignist.Models
         [JsonProperty("passwordHash")]
         public string PasswordHash { get; set; }
 
-        [JsonProperty("Roles")]
-        public List<string> Roles { get; set; } = new List<string>();
-
+        [JsonProperty("Role")]
+        public string Role { get; set; } = "Normal"; // Default role
     }
 }
 

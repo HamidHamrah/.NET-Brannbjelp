@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Ignist.Models;
 using Ignist.Data;
 using Microsoft.Azure.Cosmos;
-
+using Microsoft.AspNetCore.Authorization;
 namespace Ignist.Controllers
 {
     [Route("api/[controller]")]
@@ -19,7 +19,7 @@ namespace Ignist.Controllers
         }
 
         // Get all Publications
-        [HttpGet]
+        [HttpGet, Authorize]
         public async Task<ActionResult<List<Publication>>> GetAllPublications()
         {
             var publications = await _publicationsRepository.GetAllPublicationsAsync();
