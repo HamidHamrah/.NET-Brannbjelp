@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 25.0.1706.8
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34601.278
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ignist", "Ignist\Ignist.csproj", "{9DB905D4-A0A7-491C-9D48-4FF12997F7DF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ignist", "Ignist\Ignist.csproj", "{9DB905D4-A0A7-491C-9D48-4FF12997F7DF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests-Ignist", "UnitTests-Ignist\UnitTests-Ignist.csproj", "{0FC91F39-BB43-4ED5-8107-90826F468FCF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{9DB905D4-A0A7-491C-9D48-4FF12997F7DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9DB905D4-A0A7-491C-9D48-4FF12997F7DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9DB905D4-A0A7-491C-9D48-4FF12997F7DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FC91F39-BB43-4ED5-8107-90826F468FCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FC91F39-BB43-4ED5-8107-90826F468FCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FC91F39-BB43-4ED5-8107-90826F468FCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FC91F39-BB43-4ED5-8107-90826F468FCF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

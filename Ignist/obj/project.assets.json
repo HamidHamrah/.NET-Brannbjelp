@@ -4443,24 +4443,26 @@
     ]
   },
   "packageFolders": {
-    "/Users/hamid/.nuget/packages/": {}
+    "C:\\Users\\hanne\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/hamid/Desktop/Net-Ignist/Ignist/Ignist.csproj",
+      "projectUniqueName": "C:\\Users\\hanne\\Source\\Repos\\Net-Ignist\\Ignist\\Ignist.csproj",
       "projectName": "Ignist",
-      "projectPath": "/Users/hamid/Desktop/Net-Ignist/Ignist/Ignist.csproj",
-      "packagesPath": "/Users/hamid/.nuget/packages/",
-      "outputPath": "/Users/hamid/Desktop/Net-Ignist/Ignist/obj/",
+      "projectPath": "C:\\Users\\hanne\\Source\\Repos\\Net-Ignist\\Ignist\\Ignist.csproj",
+      "packagesPath": "C:\\Users\\hanne\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\hanne\\Source\\Repos\\Net-Ignist\\Ignist\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/hamid/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\hanne\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -4541,7 +4543,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.201/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.102/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
