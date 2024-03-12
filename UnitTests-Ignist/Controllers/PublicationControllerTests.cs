@@ -70,10 +70,13 @@ public class PublicationControllerTests
     public async Task TestGetAllPublications_Negative()
     {
         //Denne testen sjekker hva som skjer når det ikke finnes noen publikasjoner.
-        //Sjekker at metoden returnerer en tom liste når det ikke er noen i databasen
+        //Sjekker at metoden returnerer en tom liste når det ikke er noen i
+        //databasen
+        //*
 
         //arrange
         var emptyPublicationList = new List<Publication>();
+
         var mockPublicationRepository = new Mock<IPublicationsRepository>();
         mockPublicationRepository.Setup(repo => repo.GetAllPublicationsAsync()).ReturnsAsync(emptyPublicationList);
         var publicationController = new PublicationsController(mockPublicationRepository.Object);
@@ -94,13 +97,17 @@ public class PublicationControllerTests
         //Det forventes at metoden returnerer NoContent (HTTP-statuskode 204),
         //og at DeletePublicationAsync-metoden i repository blir kalt én gang med riktig
         //id og bruker-ID.
+        //*
 
         //arrange
-        var mockPublicationRepository = new Mock<IPublicationsRepository>();
-        var publicationController = new PublicationsController(mockPublicationRepository.Object);
         var publicationId = "1";
         var userId = "user123";
+        var publication = new Publication { Id = publicationId, Title = "Tittel", Content = "Content", UserId = userId };
 
+        var mockPublicationRepository = new Mock<IPublicationsRepository>();
+        var publicationController = new PublicationsController(mockPublicationRepository.Object);
+        mockPublicationRepository.Setup(repo => repo.AddPublicationAsync(publication));
+                      
         //act
         var result = await publicationController.DeletePublication(publicationId, userId);
 
@@ -138,7 +145,8 @@ public class PublicationControllerTests
     [Fact]
     public async Task TestAddPublication_Positive()
     {
-        //Testen oppretter en ny publikasjon, simulerer en forespørsel om å legge den til.
+        //Testen oppretter en ny publikasjon, simulerer en forespørsel om å legge
+        //den til.
         //Testen sjekker om responsen er en CreatedAtActionResult.
 
         //arrange
@@ -175,8 +183,8 @@ public class PublicationControllerTests
         var newPublication = new Publication
         {
             Id = "1",
-            Title = "Ny publikasjon",
-            Content = "Dette er innholdet i den nye publikasjonen.",
+            Title = "Titteli",
+            Content = "Dette er innholdet i publikasjonen",
             CreatedAt = DateTime.Now,
             UpdatedAt = DateTime.Now,
             UserId = "user123",
@@ -185,11 +193,14 @@ public class PublicationControllerTests
         };
 
         var mockPublicationRepository = new Mock<IPublicationsRepository>();
-        mockPublicationRepository.Setup(repo => repo.AddPublicationAsync(newPublication)).ThrowsAsync(new Exception("Feil ved tillegg av publikasjon."));
-        var publicationController = new PublicationsController(mockPublicationRepository.Object);
+        mockPublicationRepository.Setup(repo => repo.AddPublicationAsync(newPublication)).
+            ThrowsAsync(new Exception("Something went wrong when adding new publication."));
+        var publicationController = new PublicationsController(
+            mockPublicationRepository.Object);
 
         //act & assert
-        await Assert.ThrowsAsync<Exception>(() => publicationController.AddPublication(newPublication));
+        await Assert.ThrowsAsync<Exception>(() => 
+            publicationController.AddPublication(newPublication));
     }
 
  
