@@ -19,7 +19,8 @@ namespace Ignist.Controllers
         }
 
         // Get all Publications
-        [HttpGet, Authorize]
+        [HttpGet]
+        //[Authorize(Roles = "Normal")]
         public async Task<ActionResult<List<Publication>>> GetAllPublications()
         {
             var publications = await _publicationsRepository.GetAllPublicationsAsync();
@@ -83,6 +84,13 @@ namespace Ignist.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<Publication>> UpdatePublication(string id, Publication updatedPublication)
         {
+            if (string.IsNullOrEmpty(updatedPublication.Id) || updatedPublication.Id != id)
+            {
+                return BadRequest("The ID of the publication does not match the request.");
+            }
+
+            // Optionally, add more checks or logic here, e.g., validate parentId if necessary
+
             try
             {
                 await _publicationsRepository.UpdatePublicationAsync(updatedPublication);
@@ -93,6 +101,7 @@ namespace Ignist.Controllers
                 return NotFound("Publication not found.");
             }
         }
+
 
         // Deleting a publication
         [HttpDelete("{id}")]
