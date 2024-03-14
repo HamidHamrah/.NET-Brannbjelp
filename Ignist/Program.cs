@@ -75,20 +75,22 @@ builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"])),
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidIssuer = configuration["Jwt:Issuer"],
-        ValidAudience = configuration["Jwt:Audience"],
-        ClockSkew = TimeSpan.Zero
-    };
 });
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"])),
+            ValidateIssuer = true, // to validate the Issuer
+            ValidateAudience = true, // to validate the Audience
+            ValidIssuer = configuration["Jwt:Issuer"], // the Issuer from appsettings.json
+            ValidAudience = configuration["Jwt:Audience"], // the Audience from appsettings.json
+            ClockSkew = TimeSpan.Zero // Optional: reduces or eliminates clock skew tolerance
+        };
+    });
+
 #endregion
 
 

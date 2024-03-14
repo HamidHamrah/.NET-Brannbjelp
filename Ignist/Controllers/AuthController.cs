@@ -88,7 +88,7 @@ namespace Ignist.Controllers
 
             // Generer JWT-token
             var token = _jwtTokenService.GenerateToken(user);
-            return Ok(new {token});
+            return Ok(token);
         }
 
     }
