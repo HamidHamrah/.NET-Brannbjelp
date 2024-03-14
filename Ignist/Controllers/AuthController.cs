@@ -90,7 +90,22 @@ namespace Ignist.Controllers
             var token = _jwtTokenService.GenerateToken(user);
             return Ok(token);
         }
+        [HttpGet("aboutme")]
+        public async Task<IActionResult> AboutMe([FromQuery] string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return BadRequest("Email is required.");
+            }
 
+            var user = await _cosmosDbService.GetUserByEmailAsync(email);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            // Return only safe and necessary user details
+            return Ok(new { user.Id, user.UserName, user.Email });
+        }
     }
 }
-
