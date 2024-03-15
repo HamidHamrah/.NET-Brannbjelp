@@ -23,9 +23,17 @@ namespace Ignist.Controllers
         [Authorize(Roles ="Admin")]
         public async Task<ActionResult<List<Publication>>> GetAllPublications()
         {
-            var publications = await _publicationsRepository.GetAllPublicationsAsync();
-            return Ok(publications);
+            try
+            {
+                var publications = await _publicationsRepository.GetAllPublicationsAsync();
+                return Ok(publications);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving publications. please try again later.");
+            }
         }
+
 
         //Return the last id
         [HttpGet("last")]
