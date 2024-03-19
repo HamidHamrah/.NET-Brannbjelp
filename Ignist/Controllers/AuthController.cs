@@ -101,6 +101,7 @@ namespace Ignist.Controllers
             return Ok(token);
         }
 
+
         [HttpPost("ForgotPassword")]
         [AllowAnonymous]
         public async Task<IActionResult> ForgotPassword([Required] string email)
@@ -108,20 +109,28 @@ namespace Ignist.Controllers
             var user = await _cosmosDbService.GetUserByEmailAsync(email);
             if (user != null)
             {
+                // Generere token og lagre det sammen med brukeren i databasen
                 var token = await _cosmosDbService.GeneratePasswordResetTokenAsync(user);
-                var encodedToken = Encoding.UTF8.GetBytes(token);
-                var validToken = WebEncoders.Base64UrlEncode(encodedToken);
+                var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
-                string url = $"{_configuration["applicationUrl"]}/ForgotPassword-Zulfeqar?email={email}&token={validToken}";
+                // Bygg lenken som skal sendes via e-post, inkluderer det kodede tokenet
+                var url = $"{_configuration["applicationUrl"]}/ResetPassword?email={email}&token={encodedToken}";
 
-                await _emailService.SendEmailAsync(email, "Reset Password", "<h1>Follow the instructions to reset your password</h1>" +
-                    $"<p>To reset your password <a href='{url}'>Click here</a></p>");
+                // Formater e-postmeldingen
+                var emailMessage = $"<h1>Follow the instructions to reset your password</h1>" +
+                                   $"<p>To reset your password <a href='{url}'>Click here</a></p>";
+
+                // Send e-post
+                await _emailService.SendEmailAsync(email, "Reset Password", emailMessage);
 
                 return Ok(new { message = $"Password change request is sent to {user.Email}. Please check your email." });
             }
 
             return NotFound(new { message = "User not registered." });
         }
+
+
+
 
 
         [HttpGet("aboutme")]
