@@ -3,7 +3,11 @@ using Ignist.Data.Services;
 using Ignist.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
-
+using Ignist.Data.EmailServices;
+using Microsoft.AspNetCore.Authorization;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace Ignist.Controllers
 {
@@ -15,12 +19,18 @@ namespace Ignist.Controllers
         private readonly ICosmosDbService _cosmosDbService;
         private readonly PasswordHelper _passwordHelper;
         private readonly JwtTokenService _jwtTokenService;
+        private readonly IEmailService _emailService;
+        private readonly IConfiguration _configuration;
 
-        public AuthController(ICosmosDbService cosmosDbService, PasswordHelper passwordHelper, JwtTokenService jwtTokenService)
+
+
+        public AuthController(ICosmosDbService cosmosDbService, PasswordHelper passwordHelper, JwtTokenService jwtTokenService, IEmailService emailService, IConfiguration configuration)
         {
             _cosmosDbService = cosmosDbService;
             _passwordHelper = passwordHelper;
             _jwtTokenService = jwtTokenService;
+            _emailService = emailService;
+            _configuration = configuration;
         }
 
         [HttpPost("register")]
@@ -90,6 +100,30 @@ namespace Ignist.Controllers
             var token = _jwtTokenService.GenerateToken(user);
             return Ok(token);
         }
+
+        [HttpPost("ForgotPassword")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotPassword([Required] string email)
+        {
+            var user = await _cosmosDbService.GetUserByEmailAsync(email);
+            if (user != null)
+            {
+                var token = await _cosmosDbService.GeneratePasswordResetTokenAsync(user);
+                var encodedToken = Encoding.UTF8.GetBytes(token);
+                var validToken = WebEncoders.Base64UrlEncode(encodedToken);
+
+                string url = $"{_configuration["applicationUrl"]}/ForgotPassword-Zulfeqar?email={email}&token={validToken}";
+
+                await _emailService.SendEmailAsync(email, "Reset Password", "<h1>Follow the instructions to reset your password</h1>" +
+                    $"<p>To reset your password <a href='{url}'>Click here</a></p>");
+
+                return Ok(new { message = $"Password change request is sent to {user.Email}. Please check your email." });
+            }
+
+            return NotFound(new { message = "User not registered." });
+        }
+
+
         [HttpGet("aboutme")]
         public async Task<IActionResult> AboutMe([FromQuery] string email)
         {

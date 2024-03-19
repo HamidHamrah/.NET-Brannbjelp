@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
+using Ignist.Data.EmailServices;
+
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
@@ -46,7 +48,12 @@ builder.Services.AddCors(publications => publications.AddPolicy("corspolicy", bu
     build.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
 }));
 
-
+//kode for å sende linl til reset passord
+builder.Services.AddScoped<IEmailService>(serviceProvider =>
+{
+    var config = serviceProvider.GetRequiredService<IConfiguration>();
+    return new SendGridEmailService(config);
+});
 
 //JWT token Singleton
 builder.Services.AddSingleton<JwtTokenService>(sp =>

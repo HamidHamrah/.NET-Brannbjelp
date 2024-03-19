@@ -19,6 +19,12 @@ namespace Ignist.Models
 
         [JsonProperty("Role")]
         public string Role { get; set; } = "Normal"; // Default role
+
+        [JsonProperty("PasswordResetToken")]
+        public string PasswordResetToken { get; set; }
+
+        [JsonProperty("PasswordResetTokenExpires")]
+        public DateTime PasswordResetTokenExpires { get; set; }
     }
 }
 
