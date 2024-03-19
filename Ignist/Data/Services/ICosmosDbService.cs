@@ -10,6 +10,7 @@ namespace Ignist.Data.Services
 
         Task AddUserAsync(User user);
         Task<string> GeneratePasswordResetTokenAsync(User user);
+        Task UpdateUserAsync(User user);
     }
 }
 

@@ -58,5 +58,10 @@ namespace Ignist.Data.Services
         {
             await _container.CreateItemAsync(user, new PartitionKey(user.Email));
         }
+
+        public async Task UpdateUserAsync(User user)
+        {
+            await _container.UpsertItemAsync(user, new PartitionKey(user.Email));
+        }
     }
 }

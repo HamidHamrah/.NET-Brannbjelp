@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Authorization;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using Microsoft.AspNetCore.WebUtilities;
+using Ignist.Models.Authentication;
+
 
 namespace Ignist.Controllers
 {
@@ -69,7 +71,6 @@ namespace Ignist.Controllers
         }
 
 
-
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginModel loginModel)
         {
@@ -109,18 +110,16 @@ namespace Ignist.Controllers
             var user = await _cosmosDbService.GetUserByEmailAsync(email);
             if (user != null)
             {
-                // Generere token og lagre det sammen med brukeren i databasen
+                // i denne delen generer vi tilgeldig token i databassen
                 var token = await _cosmosDbService.GeneratePasswordResetTokenAsync(user);
                 var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
-                // Bygg lenken som skal sendes via e-post, inkluderer det kodede tokenet
-                var url = $"{_configuration["applicationUrl"]}/ResetPassword?email={email}&token={encodedToken}";
+  
+                var url = $"{_configuration["applicationUrl"]}/ResetPassword?email={email} AND THSI IS YOUT TOKEN token={encodedToken}";
 
-                // Formater e-postmeldingen
                 var emailMessage = $"<h1>Follow the instructions to reset your password</h1>" +
                                    $"<p>To reset your password <a href='{url}'>Click here</a></p>";
 
-                // Send e-post
                 await _emailService.SendEmailAsync(email, "Reset Password", emailMessage);
 
                 return Ok(new { message = $"Password change request is sent to {user.Email}. Please check your email." });
@@ -130,8 +129,45 @@ namespace Ignist.Controllers
         }
 
 
+        [HttpPost("reset-password")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            if (request == null || string.IsNullOrWhiteSpace(request.Token) || string.IsNullOrWhiteSpace(request.NewPassword))
+            {
+                return BadRequest("Invalid request.");
+            }
 
+            var user = await _cosmosDbService.GetUserByEmailAsync(request.Email);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
 
+            var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.Token));
+
+            // Valider token og sjekk at den ikke har utløpt
+            if (user.PasswordResetToken != decodedToken || user.PasswordResetTokenExpires < DateTime.UtcNow)
+            {
+                return BadRequest("Invalid or expired token.");
+            }
+
+            try
+            {
+                // Oppdater brukerens passord
+                user.PasswordHash = _passwordHelper.HashPassword(request.NewPassword);
+                user.PasswordResetToken = null; // Fjern reset token
+                user.PasswordResetTokenExpires = DateTime.MinValue; // Sett utløpstiden tilbake
+
+                await _cosmosDbService.UpdateUserAsync(user);
+
+                return Ok("Password has been successfully reset.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"An error occurred while resetting the password: {ex.Message}");
+            }
+        }
 
         [HttpGet("aboutme")]
         public async Task<IActionResult> AboutMe([FromQuery] string email)
