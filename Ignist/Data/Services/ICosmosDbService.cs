@@ -10,6 +10,7 @@ namespace Ignist.Data.Services
 
         Task AddUserAsync(User user);
         Task UpdateUserAsync(User user);
+        Task<IEnumerable<User>> GetAllUsersAsync();
     }
 }
 

@@ -49,5 +49,21 @@ namespace Ignist.Data.Services
         {
             await _container.UpsertItemAsync(user, new PartitionKey(user.Email));
         }
+
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        {
+            var container = _cosmosClient.GetContainer("Ignist", "User2"); //her må man oppgi manuelt database navn og container
+            var query = "SELECT * FROM c"; 
+            var queryIterator = container.GetItemQueryIterator<User>(query);
+            var users = new List<User>();
+
+            while (queryIterator.HasMoreResults)
+            {
+                var response = await queryIterator.ReadNextAsync();
+                users.AddRange(response.ToList());
+            }
+
+            return users;
+        }
     }
 }

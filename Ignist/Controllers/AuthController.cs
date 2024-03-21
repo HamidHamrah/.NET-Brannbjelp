@@ -174,5 +174,19 @@ namespace Ignist.Controllers
             // Return only safe and necessary user details
             return Ok(new { user.Id, user.UserName, user.Email });
         }
+
+        [HttpGet("users")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            try
+            {
+                var users = await _cosmosDbService.GetAllUsersAsync();
+                return Ok(users);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"An error occurred while retrieving users: {ex.Message}");
+            }
+        }
     }
 }
