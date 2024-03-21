@@ -102,7 +102,6 @@ namespace Ignist.Controllers
             return Ok(token);
         }
 
-
         [HttpPost("ForgotPassword")]
         [AllowAnonymous]
         public async Task<IActionResult> ForgotPassword([Required] string email)
@@ -110,54 +109,43 @@ namespace Ignist.Controllers
             var user = await _cosmosDbService.GetUserByEmailAsync(email);
             if (user != null)
             {
-                // i denne delen generer vi tilgeldig token i databassen
-                var token = await _cosmosDbService.GeneratePasswordResetTokenAsync(user);
-                var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+                // Generer tilfeldig kode
+                var random = new Random();
+                var code = random.Next(100000, 999999).ToString(); // Genererer en 6-sifret kode
 
-  
-                var url = $"{_configuration["applicationUrl"]}/ResetPassword?email={email} AND THSI IS YOUT TOKEN token={encodedToken}";
+                // Lagre kode og utløpstid i databasen
+                user.PasswordResetCode = code;
+                user.PasswordResetCodeExpires = DateTime.UtcNow.AddHours(1); // Koden utløper om 1 time
+                await _cosmosDbService.UpdateUserAsync(user);
 
+                // Send e-post med koden
                 var emailMessage = $"<h1>Follow the instructions to reset your password</h1>" +
-                                   $"<p>To reset your password <a href='{url}'>Click here</a></p>";
+                                   $"<p>Your password reset code is: {code}</p>";
 
                 await _emailService.SendEmailAsync(email, "Reset Password", emailMessage);
 
-                return Ok(new { message = $"Password change request is sent to {user.Email}. Please check your email." });
+                return Ok(new { message = $"Password change request is sent to {user.Email}. Please check your email for the reset code." });
             }
 
             return NotFound(new { message = "User not registered." });
         }
 
-
         [HttpPost("reset-password")]
         [AllowAnonymous]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
         {
-            if (request == null || string.IsNullOrWhiteSpace(request.Token) || string.IsNullOrWhiteSpace(request.NewPassword))
-            {
-                return BadRequest("Invalid request.");
-            }
-
             var user = await _cosmosDbService.GetUserByEmailAsync(request.Email);
-            if (user == null)
+            if (user == null || user.PasswordResetCodeExpires < DateTime.UtcNow || user.PasswordResetCode != request.Code)
             {
-                return NotFound("User not found.");
-            }
-
-            var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.Token));
-
-            // Valider token og sjekk at den ikke har utløpt
-            if (user.PasswordResetToken != decodedToken || user.PasswordResetTokenExpires < DateTime.UtcNow)
-            {
-                return BadRequest("Invalid or expired token.");
+                return BadRequest("Invalid or expired code.");
             }
 
             try
             {
                 // Oppdater brukerens passord
                 user.PasswordHash = _passwordHelper.HashPassword(request.NewPassword);
-                user.PasswordResetToken = null; // Fjern reset token
-                user.PasswordResetTokenExpires = DateTime.MinValue; // Sett utløpstiden tilbake
+                user.PasswordResetCode = null; // Fjern kode
+                user.PasswordResetCodeExpires = DateTime.MinValue; // Sett utløpstiden tilbake
 
                 await _cosmosDbService.UpdateUserAsync(user);
 

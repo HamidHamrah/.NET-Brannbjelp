@@ -6,7 +6,7 @@ namespace Ignist.Models
     public class User
     {
         [JsonProperty("id")]
-        public string Id { get; set; } = Guid.NewGuid().ToString(); 
+        public string Id { get; set; } = Guid.NewGuid().ToString();
 
         [JsonProperty("UserName")]
         public string UserName { get; set; }
@@ -20,11 +20,13 @@ namespace Ignist.Models
         [JsonProperty("Role")]
         public string Role { get; set; } = "Normal"; // Default role
 
-        [JsonProperty("PasswordResetToken")]
-        public string PasswordResetToken { get; set; }
 
-        [JsonProperty("PasswordResetTokenExpires")]
-        public DateTime PasswordResetTokenExpires { get; set; }
+
+        [JsonProperty("PasswordResetCode")]
+        public string PasswordResetCode { get; set; }
+
+        [JsonProperty("PasswordResetCodeExpires")]
+        public DateTime PasswordResetCodeExpires { get; set; }
     }
 }
 

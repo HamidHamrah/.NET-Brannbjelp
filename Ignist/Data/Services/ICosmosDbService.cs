@@ -9,7 +9,6 @@ namespace Ignist.Data.Services
         Task<User> GetUserByEmailAsync(string email);
 
         Task AddUserAsync(User user);
-        Task<string> GeneratePasswordResetTokenAsync(User user);
         Task UpdateUserAsync(User user);
     }
 }

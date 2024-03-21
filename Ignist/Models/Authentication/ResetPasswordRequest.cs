@@ -3,10 +3,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Ignist.Models.Authentication
 {
-	public class ResetPasswordRequest
-	{
+    public class ResetPasswordRequest
+    {
         [Required]
-        public string Token { get; set; }
+        public string Code { get; set; }
+
 
         [Required]
         public string Email { get; set; }

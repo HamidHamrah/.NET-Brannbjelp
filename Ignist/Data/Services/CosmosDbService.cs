@@ -39,20 +39,6 @@ namespace Ignist.Data.Services
             return matches.FirstOrDefault();
         }
 
-        public async Task<string> GeneratePasswordResetTokenAsync(User user)
-        {
-           
-            var token = Guid.NewGuid().ToString();
-
-            user.PasswordResetToken = token;
-            user.PasswordResetTokenExpires = DateTime.UtcNow.AddMonths(1); 
-
-        
-            await _container.UpsertItemAsync(user, new PartitionKey(user.Email));
-
-            return token;
-        }
-
         // metoden for å lage ny bruker
         public async Task AddUserAsync(User user)
         {
