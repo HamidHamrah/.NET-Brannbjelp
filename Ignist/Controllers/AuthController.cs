@@ -7,6 +7,7 @@ using Ignist.Data.EmailServices;
 using Microsoft.AspNetCore.Authorization;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using System.Security.Claims;
 using Microsoft.AspNetCore.WebUtilities;
 using Ignist.Models.Authentication;
 
@@ -155,6 +156,50 @@ namespace Ignist.Controllers
             {
                 return BadRequest($"An error occurred while resetting the password: {ex.Message}");
             }
+        }
+
+        [HttpPost("update-password")]
+        [Authorize]
+        public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var userEmail = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return Unauthorized("Invalid token.");
+            }
+
+            var user = await _cosmosDbService.GetUserByEmailAsync(userEmail);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            var result = _passwordHelper.VerifyPassword(user.PasswordHash, model.OldPassword);
+            if (result == PasswordVerificationResult.Failed)
+            {
+                return BadRequest("Old password is incorrect.");
+            }
+
+            if (!model.NewPassword.Equals(model.ConfirmNewPassword))
+            {
+                return BadRequest("The new password and confirmation password do not match.");
+            }
+
+            // Her legger vi til en ekstra sjekk for å sikre at det nye passordet oppfyller kompleksitetskravene
+            if (!_passwordHelper.ValidatePassword(model.NewPassword))
+            {
+                return BadRequest("New password does not meet complexity requirements.");
+            }
+
+            user.PasswordHash = _passwordHelper.HashPassword(model.NewPassword);
+            await _cosmosDbService.UpdateUserAsync(user);
+
+            return Ok("Password updated successfully.");
         }
 
         [HttpGet("aboutme")]
