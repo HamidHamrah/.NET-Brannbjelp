@@ -10,6 +10,8 @@ using Moq;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using Microsoft.Azure.Cosmos;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace UnitTests_Ignist.Controllers;
 
@@ -52,7 +54,7 @@ public class PublicationControllerTests
         .ReturnsAsync(publicationList);
 
         var publicationController = new PublicationsController(mockPublicationRepository.Object);
-        
+
         //act
         var result = await publicationController.GetAllPublications();
 
@@ -66,22 +68,24 @@ public class PublicationControllerTests
     [Fact]
     public async Task TestGetAllPublications_Negative()
     {
-        //Denne testen sjekker hva som skjer når det ikke finnes noen publikasjoner.
-        //Sjekker at metoden returnerer NotFound når det ikke er noen publikasjoner
-        //databasen
+        //Sjekker at metoden håndterer feil ved henting av publikasjoner
+        //Testen fremprovoserer en exception og sjekker at metoden kaster exception og 
+        //gir feilmelding. Sjekker også at det gis statuskode 500 internal server error.
 
         //arrange
-        var emptyPublicationList = new List<Publication>();
-
         var mockPublicationRepository = new Mock<IPublicationsRepository>();
-        mockPublicationRepository.Setup(repo => repo.GetAllPublicationsAsync()).ReturnsAsync(emptyPublicationList);
+        mockPublicationRepository.Setup(repo => repo.GetAllPublicationsAsync())
+                      .ThrowsAsync(new Exception("Mocked exception"));
+
         var publicationController = new PublicationsController(mockPublicationRepository.Object);
 
         //act
         var result = await publicationController.GetAllPublications();
 
         //assert
-        Assert.IsType<NotFoundResult>(result.Result); 
+        var statusCodeResult = Assert.IsType<ObjectResult>(result.Result);
+        Assert.Equal(StatusCodes.Status500InternalServerError, statusCodeResult.StatusCode);
+        Assert.Equal("An error occurred while retrieving publications. please try again later.", statusCodeResult.Value);
     }
 
     [Fact]
@@ -186,25 +190,22 @@ public class PublicationControllerTests
         Assert.Equal(expectedMessage, notFoundResult.Value);
     }
 
-    
+
     [Fact]
     public async Task TestDeletePublication_Positive()
     {
-        //Denne testen simulerer slettingen av en publikasjon som finnes i databasen.
+        //Denne testen simulerer slettingen av en publikasjon
         //Det forventes at metoden returnerer NoContent (HTTP-statuskode 204),
         //og at DeletePublicationAsync-metoden i repository blir kalt én gang med riktig
         //id og bruker-ID.
-        //*
 
         //arrange
         var publicationId = "1";
         var userId = "user123";
-        var publication = new Publication { Id = publicationId, Title = "Tittel", Content = "Content", UserId = userId };
-
         var mockPublicationRepository = new Mock<IPublicationsRepository>();
+        mockPublicationRepository.Setup(repo => repo.DeletePublicationAsync(publicationId, userId));
         var publicationController = new PublicationsController(mockPublicationRepository.Object);
-        mockPublicationRepository.Setup(repo => repo.AddPublicationAsync(publication));
-                      
+
         //act
         var result = await publicationController.DeletePublication(publicationId, userId);
 
@@ -223,13 +224,13 @@ public class PublicationControllerTests
         //en CosmosException med statuskoden for "Not Found".
 
         //arrange
+        var publicationId = "1";
+        var userId = "user123";
         var mockPublicationRepository = new Mock<IPublicationsRepository>();
         mockPublicationRepository.Setup(repo => repo.DeletePublicationAsync(It.IsAny<string>(), It.IsAny<string>()))
                                   .ThrowsAsync(new CosmosException("Publication not found.", HttpStatusCode.NotFound, 404, "Not Found", 0));
 
         var publicationController = new PublicationsController(mockPublicationRepository.Object);
-        var publicationId = "1";
-        var userId = "user123";
 
         // act
         var result = await publicationController.DeletePublication(publicationId, userId);
@@ -292,15 +293,13 @@ public class PublicationControllerTests
         var mockPublicationRepository = new Mock<IPublicationsRepository>();
         mockPublicationRepository.Setup(repo => repo.AddPublicationAsync(newPublication)).
             ThrowsAsync(new Exception("Something went wrong when adding new publication."));
-        var publicationController = new PublicationsController(
-            mockPublicationRepository.Object);
+        var publicationController = new PublicationsController(mockPublicationRepository.Object);
 
         //act & assert
-        await Assert.ThrowsAsync<Exception>(() => 
+        await Assert.ThrowsAsync<Exception>(() =>
             publicationController.AddPublication(newPublication));
     }
 
-    //fungerer ikke som den skal
     [Fact]
     public async Task TestUpdatePublication_Positive()
     {
@@ -309,25 +308,17 @@ public class PublicationControllerTests
 
         //arrange
         string id = "1";
-        var oldPublication = new Publication
-        {
-            Id = id,
-            Title = "Titteli",
-            Content = "Dette er innholdet i publikasjonen",
-            UserId = "user123",
-            ParentId = "parent123",
-        };
         var newPublication = new Publication
         {
             Id = id,
-            Title = "Ny tittel",
+            Title = "tittel",
             Content = "Oppdaterer innholdet",
             UserId = "user123",
             ParentId = "parent123",
         };
 
         var mockPublicationRepository = new Mock<IPublicationsRepository>();
-        mockPublicationRepository.Setup(repo => repo.AddPublicationAsync(oldPublication));
+        mockPublicationRepository.Setup(repo => repo.UpdatePublicationAsync(newPublication));
         var publicationController = new PublicationsController(mockPublicationRepository.Object);
 
         //act
@@ -336,9 +327,7 @@ public class PublicationControllerTests
         //assert
         mockPublicationRepository.Verify(repo => repo.UpdatePublicationAsync(newPublication), Times.Once);
         Assert.IsType<ActionResult<Publication>>(result);
-        Assert.Equal(newPublication.Title, oldPublication.Title);
-        Assert.Equal(newPublication.Content, oldPublication.Content);
-        
+
     }
 
     [Fact]
@@ -350,10 +339,10 @@ public class PublicationControllerTests
 
         //arrange
         string id = "1";
-        var invalidId = "2"; 
+        string invalidId = "2";
         var updatedPublication = new Publication
         {
-            Id = invalidId,
+            Id = id,
             Title = "Updated Title",
             Content = "Updated Content",
             UserId = "user123",
@@ -364,7 +353,7 @@ public class PublicationControllerTests
         var publicationController = new PublicationsController(mockPublicationRepository.Object);
 
         //act
-        var result = await publicationController.UpdatePublication(id, updatedPublication);
+        var result = await publicationController.UpdatePublication(invalidId, updatedPublication);
 
         //assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);

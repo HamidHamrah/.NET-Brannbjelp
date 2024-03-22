@@ -18,11 +18,11 @@ public class PublicationModelTests
         //ikke har tittel. 
 
         //arrange
-        var publication = new Publication();
+        var publication = new Publication { Title = null };
 
         //act
         var validationResults = new List<ValidationResult>();
-        var isValid = Validator.TryValidateObject(publication, new ValidationContext(publication), 
+        var isValid = Validator.TryValidateObject(publication, new ValidationContext(publication),
             validationResults, true);
 
         //assert
@@ -36,7 +36,7 @@ public class PublicationModelTests
         //Sjekker at required-annotasjon på 'content' fungerer som den skal
 
         //arrange
-        var publication = new Publication();
+        var publication = new Publication { Content = null };
 
         //act
         var validationResults = new List<ValidationResult>();
@@ -47,4 +47,6 @@ public class PublicationModelTests
         Assert.False(isValid);
         Assert.Contains(validationResults, vr => vr.MemberNames.Contains("Content"));
     }
+
+
 }
