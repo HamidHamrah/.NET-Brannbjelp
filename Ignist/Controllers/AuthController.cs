@@ -233,5 +233,34 @@ namespace Ignist.Controllers
                 return BadRequest($"An error occurred while retrieving users: {ex.Message}");
             }
         }
+
+        [HttpPut("update-user/{currentEmail}")]
+        public async Task<IActionResult> UpdateUser(string currentEmail, [FromBody] UserUpdateModel updateModel)
+        {
+            if (string.IsNullOrWhiteSpace(currentEmail))
+            {
+                return BadRequest("Current email is required.");
+            }
+
+            var user = await _cosmosDbService.GetUserByEmailAsync(currentEmail);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+            user.UserName = updateModel.UserName ?? user.UserName;
+            if (!string.Equals(currentEmail, updateModel.NewEmail, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(updateModel.NewEmail))
+            {
+                var newUserCheck = await _cosmosDbService.GetUserByEmailAsync(updateModel.NewEmail);
+                if (newUserCheck != null)
+                {
+                    return BadRequest("The new email is already in use.");
+                }
+                user.Email = updateModel.NewEmail;
+            }
+            await _cosmosDbService.UpdateUserAsync(user);
+
+            return Ok("User information updated successfully.");
+        }
+
     }
 }
