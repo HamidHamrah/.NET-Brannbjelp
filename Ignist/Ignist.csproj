@@ -28,10 +28,18 @@
 
   <ItemGroup>
     <None Remove="Models\" />
-    <None Remove="Data\" />
+    <None Remove="Repositries\" />
+    <None Remove="Services\" />
+    <None Remove="Services\ForgotPasswordServices\" />
+    <None Remove="Services\JwtKeyGenerator\" />
+    <None Remove="Services\Password\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Models\" />
-    <Folder Include="Data\" />
+    <Folder Include="Repositries\" />
+    <Folder Include="Services\" />
+    <Folder Include="Services\ForgotPasswordServices\" />
+    <Folder Include="Services\JwtKeyGenerator\" />
+    <Folder Include="Services\Password\" />
   </ItemGroup>
 </Project>
