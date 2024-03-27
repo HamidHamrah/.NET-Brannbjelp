@@ -6,9 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Ignist.Data.EmailServices;
 using Microsoft.AspNetCore.Authorization;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 using System.Security.Claims;
-using Microsoft.AspNetCore.WebUtilities;
 using Ignist.Models.Authentication;
 
 
@@ -262,5 +260,18 @@ namespace Ignist.Controllers
             return Ok("User information updated successfully.");
         }
 
+        [HttpDelete("delete-user/{email}")]
+        public async Task<IActionResult> DeleteUser(string email)
+        {
+            try
+            {
+                await _cosmosDbService.DeleteUserAsync(email);
+                return Ok("User deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"An error occurred while deleting the user: {ex.Message}");
+            }
+        }
     }
 }

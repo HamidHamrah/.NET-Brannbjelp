@@ -65,5 +65,24 @@ namespace Ignist.Data.Services
 
             return users;
         }
+        public async Task DeleteUserAsync(string email)
+        {
+            try
+            {
+                // Forsøker å hente brukeren først for å sikre at den eksisterer
+                var user = await GetUserByEmailAsync(email);
+                if (user == null)
+                {
+                    throw new ArgumentException("User not found.");
+                }
+
+                // Sletter brukeren basert på e-postadressen, som er partition key
+                await _container.DeleteItemAsync<User>(user.Id, new PartitionKey(email));
+            }
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                throw new ArgumentException($"No user found with email: {email}");
+            }
+        }
     }
 }
