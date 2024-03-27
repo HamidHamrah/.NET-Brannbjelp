@@ -52,7 +52,7 @@ namespace Ignist.Data.Services
 
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
-            var container = _cosmosClient.GetContainer("Ignist", "User2"); //her må man oppgi manuelt database navn og container
+            var container = _cosmosClient.GetContainer("data3900", "User2"); //her må man oppgi manuelt database navn og container
             var query = "SELECT * FROM c"; 
             var queryIterator = container.GetItemQueryIterator<User>(query);
             var users = new List<User>();
