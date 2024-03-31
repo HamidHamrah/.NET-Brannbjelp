@@ -232,34 +232,6 @@ namespace Ignist.Controllers
             }
         }
 
-        [HttpPut("update-user/{currentEmail}")]
-        public async Task<IActionResult> UpdateUser(string currentEmail, [FromBody] UserUpdateModel updateModel)
-        {
-            if (string.IsNullOrWhiteSpace(currentEmail))
-            {
-                return BadRequest("Current email is required.");
-            }
-
-            var user = await _cosmosDbService.GetUserByEmailAsync(currentEmail);
-            if (user == null)
-            {
-                return NotFound("User not found.");
-            }
-            user.UserName = updateModel.UserName ?? user.UserName;
-            if (!string.Equals(currentEmail, updateModel.NewEmail, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(updateModel.NewEmail))
-            {
-                var newUserCheck = await _cosmosDbService.GetUserByEmailAsync(updateModel.NewEmail);
-                if (newUserCheck != null)
-                {
-                    return BadRequest("The new email is already in use.");
-                }
-                user.Email = updateModel.NewEmail;
-            }
-            await _cosmosDbService.UpdateUserAsync(user);
-
-            return Ok("User information updated successfully.");
-        }
-
         [HttpDelete("delete-user/{email}")]
         public async Task<IActionResult> DeleteUser(string email)
         {
@@ -273,5 +245,47 @@ namespace Ignist.Controllers
                 return BadRequest($"An error occurred while deleting the user: {ex.Message}");
             }
         }
+
+        [HttpPut("update-user/{currentEmail}")]
+        public async Task<IActionResult> UpdateUser(string currentEmail, [FromBody] UserUpdateModel updateModel)
+        {
+            if (string.IsNullOrWhiteSpace(currentEmail) || updateModel == null)
+            {
+                return BadRequest("Current email and update information are required.");
+            }
+
+            var user = await _cosmosDbService.GetUserByEmailAsync(currentEmail);
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            // Hvis e-postadressen endres, må vi slette den gamle posten og opprette en ny.
+            if (!string.Equals(currentEmail, updateModel.NewEmail, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(updateModel.NewEmail))
+            {
+                // Sjekk om den nye e-postadressen allerede er i bruk
+                var newUserCheck = await _cosmosDbService.GetUserByEmailAsync(updateModel.NewEmail);
+                if (newUserCheck != null)
+                {
+                    return BadRequest("The new email is already in use.");
+                }
+
+                // Slett den gamle brukerposten
+                await _cosmosDbService.DeleteUserAsync(currentEmail);
+
+                // Oppdatere brukermodellen før du legger den til på nytt
+                user.Email = updateModel.NewEmail;
+            }
+
+            // Fortsett med å oppdatere andre felt som normalt
+            user.UserName = updateModel.UserName ?? user.UserName;
+            user.Role = updateModel.Role ?? user.Role;
+
+            // Legg til brukerposten på nytt med eventuelt ny e-postadresse
+            await _cosmosDbService.AddUserAsync(user);
+
+            return Ok("User updated successfully.");
+        }
+
     }
 }
