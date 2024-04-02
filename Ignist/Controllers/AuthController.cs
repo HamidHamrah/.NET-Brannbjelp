@@ -260,8 +260,7 @@ namespace Ignist.Controllers
                 return NotFound("User not found.");
             }
 
-            // Hvis e-postadressen endres, må vi slette den gamle posten og opprette en ny.
-            if (!string.Equals(currentEmail, updateModel.NewEmail, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(updateModel.NewEmail))
+            if (!string.IsNullOrWhiteSpace(updateModel.NewEmail) && !string.Equals(currentEmail, updateModel.NewEmail, StringComparison.OrdinalIgnoreCase))
             {
                 // Sjekk om den nye e-postadressen allerede er i bruk
                 var newUserCheck = await _cosmosDbService.GetUserByEmailAsync(updateModel.NewEmail);
@@ -270,19 +269,20 @@ namespace Ignist.Controllers
                     return BadRequest("The new email is already in use.");
                 }
 
-                // Slett den gamle brukerposten
-                await _cosmosDbService.DeleteUserAsync(currentEmail);
-
-                // Oppdatere brukermodellen før du legger den til på nytt
+                // Opprett en ny post med den nye e-postadressen og kopier eksisterende feltverdier
                 user.Email = updateModel.NewEmail;
+                await _cosmosDbService.AddUserAsync(user);
+
+                // Slett den gamle posten
+                await _cosmosDbService.DeleteUserAsync(currentEmail);
             }
-
-            // Fortsett med å oppdatere andre felt som normalt
-            user.UserName = updateModel.UserName ?? user.UserName;
-            user.Role = updateModel.Role ?? user.Role;
-
-            // Legg til brukerposten på nytt med eventuelt ny e-postadresse
-            await _cosmosDbService.AddUserAsync(user);
+            else
+            {
+                // Oppdaterer brukerinformasjonen direkte uten å endre e-postadressen
+                user.UserName = updateModel.UserName ?? user.UserName;
+                user.Role = updateModel.Role ?? user.Role;
+                await _cosmosDbService.UpdateUserAsync(user); // Antar at denne metoden utfører en "in-place" oppdatering uten å endre partition key
+            }
 
             return Ok("User updated successfully.");
         }
