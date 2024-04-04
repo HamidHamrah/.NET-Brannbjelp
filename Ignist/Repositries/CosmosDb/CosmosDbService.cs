@@ -39,6 +39,24 @@ namespace Ignist.Data.Services
             return matches.FirstOrDefault();
         }
 
+        public async Task<User> GetUserByIdAsync(string userId)
+        {
+            // Note: This query does not use a partition key, which can impact performance and cost
+            var query = new QueryDefinition("select * from c where c.id = @userId").WithParameter("@userId", userId);
+
+            var iterator = _container.GetItemQueryIterator<User>(query);
+
+            List<User> matches = new List<User>();
+            while (iterator.HasMoreResults)
+            {
+                var response = await iterator.ReadNextAsync();
+                matches.AddRange(response.ToList());
+            }
+
+            return matches.FirstOrDefault();
+        }
+
+
         // metoden for å lage ny bruker
         public async Task AddUserAsync(User user)
         {

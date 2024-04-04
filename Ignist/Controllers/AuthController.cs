@@ -201,14 +201,14 @@ namespace Ignist.Controllers
         }
 
         [HttpGet("aboutme")]
-        public async Task<IActionResult> AboutMe([FromQuery] string email)
+        public async Task<IActionResult> AboutMe([FromQuery] string id)
         {
-            if (string.IsNullOrWhiteSpace(email))
+            if (string.IsNullOrWhiteSpace(id))
             {
-                return BadRequest("Email is required.");
+                return BadRequest("ID is required.");
             }
 
-            var user = await _cosmosDbService.GetUserByEmailAsync(email);
+            var user = await _cosmosDbService.GetUserByIdAsync(id); // Updated to use GetUserByIdAsync
             if (user == null)
             {
                 return NotFound("User not found.");
@@ -217,6 +217,7 @@ namespace Ignist.Controllers
             // Return only safe and necessary user details
             return Ok(new { user.Id, user.UserName, user.Email });
         }
+
 
         [HttpGet("users")]
         public async Task<IActionResult> GetAllUsers()

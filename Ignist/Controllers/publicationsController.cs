@@ -20,7 +20,6 @@ namespace Ignist.Controllers
 
         // Get all Publications
         [HttpGet]
-        [Authorize(Roles ="Admin")]
         public async Task<ActionResult<List<Publication>>> GetAllPublications()
         {
             try
