@@ -1,9 +1,6 @@
-﻿using Ignist.Data;
-using Ignist.Data.Services;
+﻿using Ignist.Data.Services;
 using Ignist.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
-using Ignist.Data.EmailServices;
 using Microsoft.AspNetCore.Authorization;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
@@ -18,20 +15,9 @@ namespace Ignist.Controllers
     public class AuthController : ControllerBase
     {
         private readonly ICosmosDbService _cosmosDbService;
-        private readonly PasswordHelper _passwordHelper;
-        private readonly JwtTokenService _jwtTokenService;
-        private readonly IEmailService _emailService;
-        private readonly IConfiguration _configuration;
-
-
-
-        public AuthController(ICosmosDbService cosmosDbService, PasswordHelper passwordHelper, JwtTokenService jwtTokenService, IEmailService emailService, IConfiguration configuration)
+        public AuthController(ICosmosDbService cosmosDbService)
         {
             _cosmosDbService = cosmosDbService;
-            _passwordHelper = passwordHelper;
-            _jwtTokenService = jwtTokenService;
-            _emailService = emailService;
-            _configuration = configuration;
         }
 
         [HttpPost("register")]
@@ -42,30 +28,14 @@ namespace Ignist.Controllers
                 return BadRequest(ModelState);
             }
 
-            var userExists = await _cosmosDbService.GetUserByEmailAsync(registerModel.UserName);
-            if (userExists != null)
+            var result = await _cosmosDbService.RegisterUserAsync(registerModel);
+            if (result == "User registered.")
             {
-                return BadRequest("User already exists.");
+                return Ok(result);
             }
-
-            // Sjekk om e-post allerede er registrert
-
-            try
+            else
             {
-                var user = new User
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    UserName = registerModel.UserName,
-                    Email = registerModel.Email,
-                    PasswordHash = _passwordHelper.HashPassword(registerModel.Password)
-                };
-
-                await _cosmosDbService.AddUserAsync(user);
-                return Ok("User registered.");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"An error occurred: {ex.Message}");
+                return BadRequest(result);
             }
         }
 
@@ -78,83 +48,46 @@ namespace Ignist.Controllers
                 return BadRequest("Missing or invalid login details.");
             }
 
-            if (_cosmosDbService == null) return Problem("Database service is not available.");
-
-            var user = await _cosmosDbService.GetUserByEmailAsync(loginModel.email);
-            if (user == null)
+            var token = await _cosmosDbService.LoginUserAsync(loginModel);
+            if (token == "User not found." || token == "Invalid password.")
             {
-                return NotFound("User not found.");
+                return Unauthorized(token);
             }
 
-            if (_passwordHelper == null) return Problem("Password helper service is not available.");
-
-            var result = _passwordHelper.VerifyPassword(user.PasswordHash, loginModel.Password);
-            if (result == PasswordVerificationResult.Failed)
-            {
-                return Unauthorized("Invalid password.");
-            }
-
-            if (_jwtTokenService == null) return Problem("Token service is not available.");
-
-            // Generer JWT-token
-            var token = _jwtTokenService.GenerateToken(user);
-            return Ok(token);
+            return Ok(token); // Anta at token er gyldig og send til klienten
         }
+
 
         [HttpPost("ForgotPassword")]
         [AllowAnonymous]
         public async Task<IActionResult> ForgotPassword([Required] string email)
         {
-            var user = await _cosmosDbService.GetUserByEmailAsync(email);
-            if (user != null)
+            var result = await _cosmosDbService.HandleForgotPasswordAsync(email);
+            if (result != null)
             {
-                // Generer tilfeldig kode
-                var random = new Random();
-                var code = random.Next(100000, 999999).ToString(); // Genererer en 6-sifret kode
-
-                // Lagre kode og utløpstid i databasen
-                user.PasswordResetCode = code;
-                user.PasswordResetCodeExpires = DateTime.UtcNow.AddHours(1); // Koden utløper om 1 time
-                await _cosmosDbService.UpdateUserAsync(user);
-
-                // Send e-post med koden
-                var emailMessage = $"<h1>Follow the instructions to reset your password</h1>" +
-                                   $"<p>Your password reset code is: {code}</p>";
-
-                await _emailService.SendEmailAsync(email, "Reset Password", emailMessage);
-
-                return Ok(new { message = $"Password change request is sent to {user.Email}. Please check your email for the reset code." });
+                // Logikken her avhenger av hvordan du velger å håndtere e-postsending og suksessmelding.
+                return Ok(new { message = $"Password change request is sent to {email}. Please check your email for the reset code." });
             }
 
             return NotFound(new { message = "User not registered." });
         }
 
+
         [HttpPost("reset-password")]
         [AllowAnonymous]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
         {
-            var user = await _cosmosDbService.GetUserByEmailAsync(request.Email);
-            if (user == null || user.PasswordResetCodeExpires < DateTime.UtcNow || user.PasswordResetCode != request.Code)
+            var result = await _cosmosDbService.HandleResetPasswordAsync(request);
+            if (result == "Password has been successfully reset.")
             {
-                return BadRequest("Invalid or expired code.");
+                return Ok(result);
             }
-
-            try
+            else
             {
-                // Oppdater brukerens passord
-                user.PasswordHash = _passwordHelper.HashPassword(request.NewPassword);
-                user.PasswordResetCode = null; // Fjern kode
-                user.PasswordResetCodeExpires = DateTime.MinValue; // Sett utløpstiden tilbake
-
-                await _cosmosDbService.UpdateUserAsync(user);
-
-                return Ok("Password has been successfully reset.");
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"An error occurred while resetting the password: {ex.Message}");
+                return BadRequest(result);
             }
         }
+
 
         [HttpPost("update-password")]
         [Authorize]
@@ -171,34 +104,21 @@ namespace Ignist.Controllers
                 return Unauthorized("Invalid token.");
             }
 
-            var user = await _cosmosDbService.GetUserByEmailAsync(userEmail);
-            if (user == null)
+            var result = await _cosmosDbService.UpdateUserPasswordAsync(userEmail, model.OldPassword, model.NewPassword, model.ConfirmNewPassword);
+
+            if (result == "Password updated successfully.")
             {
-                return NotFound("User not found.");
+                return Ok(result);
             }
-
-            var result = _passwordHelper.VerifyPassword(user.PasswordHash, model.OldPassword);
-            if (result == PasswordVerificationResult.Failed)
+            else
             {
-                return BadRequest("Old password is incorrect.");
+                return BadRequest(result);
             }
-
-            if (!model.NewPassword.Equals(model.ConfirmNewPassword))
-            {
-                return BadRequest("The new password and confirmation password do not match.");
-            }
-
-            // Her legger vi til en ekstra sjekk for å sikre at det nye passordet oppfyller kompleksitetskravene
-            if (!_passwordHelper.ValidatePassword(model.NewPassword))
-            {
-                return BadRequest("New password does not meet complexity requirements.");
-            }
-
-            user.PasswordHash = _passwordHelper.HashPassword(model.NewPassword);
-            await _cosmosDbService.UpdateUserAsync(user);
-
-            return Ok("Password updated successfully.");
         }
+
+
+
+
 
         [HttpGet("aboutme")]
         public async Task<IActionResult> AboutMe([FromQuery] string id)
@@ -233,19 +153,25 @@ namespace Ignist.Controllers
             }
         }
 
-        [HttpDelete("delete-user/{email}")]
-        public async Task<IActionResult> DeleteUser(string email)
+
+        [HttpDelete("delete-user/{id}")]
+        public async Task<IActionResult> DeleteUser(string id)
         {
             try
             {
-                await _cosmosDbService.DeleteUserAsync(email);
+                await _cosmosDbService.DeleteUserAsync(id);
                 return Ok("User deleted successfully.");
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
-                return BadRequest($"An error occurred while deleting the user: {ex.Message}");
+                return BadRequest($"An error occurred: {ex.Message}");
             }
         }
+
 
         [HttpPut("update-user/{currentEmail}")]
         public async Task<IActionResult> UpdateUser(string currentEmail, [FromBody] UserUpdateModel updateModel)
@@ -255,37 +181,15 @@ namespace Ignist.Controllers
                 return BadRequest("Current email and update information are required.");
             }
 
-            var user = await _cosmosDbService.GetUserByEmailAsync(currentEmail);
-            if (user == null)
+            var response = await _cosmosDbService.UpdateUserAsync(currentEmail, updateModel);
+            if (response.Success)
             {
-                return NotFound("User not found.");
-            }
-
-            if (!string.IsNullOrWhiteSpace(updateModel.NewEmail) && !string.Equals(currentEmail, updateModel.NewEmail, StringComparison.OrdinalIgnoreCase))
-            {
-                // Sjekk om den nye e-postadressen allerede er i bruk
-                var newUserCheck = await _cosmosDbService.GetUserByEmailAsync(updateModel.NewEmail);
-                if (newUserCheck != null)
-                {
-                    return BadRequest("The new email is already in use.");
-                }
-
-                // Opprett en ny post med den nye e-postadressen og kopier eksisterende feltverdier
-                user.Email = updateModel.NewEmail;
-                await _cosmosDbService.AddUserAsync(user);
-
-                // Slett den gamle posten
-                await _cosmosDbService.DeleteUserAsync(currentEmail);
+                return Ok(response.Message);
             }
             else
             {
-                // Oppdaterer brukerinformasjonen direkte uten å endre e-postadressen
-                user.UserName = updateModel.UserName ?? user.UserName;
-                user.Role = updateModel.Role ?? user.Role;
-                await _cosmosDbService.UpdateUserAsync(user); // Antar at denne metoden utfører en "in-place" oppdatering uten å endre partition key
+                return BadRequest(response.Message);
             }
-
-            return Ok("User updated successfully.");
         }
 
     }

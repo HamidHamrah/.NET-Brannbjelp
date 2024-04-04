@@ -20,6 +20,7 @@ namespace Ignist.Controllers
 
         // Get all Publications
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<List<Publication>>> GetAllPublications()
         {
             try

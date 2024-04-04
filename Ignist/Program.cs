@@ -48,6 +48,8 @@ builder.Services.AddCors(publications => publications.AddPolicy("corspolicy", bu
     build.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
 }));
 
+
+
 //kode for å sende linl til reset passord
 builder.Services.AddScoped<IEmailService>(serviceProvider =>
 {
