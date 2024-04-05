@@ -173,15 +173,15 @@ namespace Ignist.Controllers
         }
 
 
-        [HttpPut("update-user/{currentEmail}")]
-        public async Task<IActionResult> UpdateUser(string currentEmail, [FromBody] UserUpdateModel updateModel)
+        [HttpPut("update-user/{userId}")] // Endret for å reflektere at vi nå bruker userId
+        public async Task<IActionResult> UpdateUser(string userId, [FromBody] UserUpdateModel updateModel)
         {
-            if (string.IsNullOrWhiteSpace(currentEmail) || updateModel == null)
+            if (string.IsNullOrWhiteSpace(userId) || updateModel == null)
             {
-                return BadRequest("Current email and update information are required.");
+                return BadRequest("User ID and update information are required.");
             }
 
-            var response = await _cosmosDbService.UpdateUserAsync(currentEmail, updateModel);
+            var response = await _cosmosDbService.UpdateUserAsync(userId, updateModel);
             if (response.Success)
             {
                 return Ok(response.Message);

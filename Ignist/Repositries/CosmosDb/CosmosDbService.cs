@@ -184,12 +184,12 @@ namespace Ignist.Data.Services
             return "Password updated successfully.";
         }
 
-        public async Task<ServiceResponse> UpdateUserAsync(string currentEmail, UserUpdateModel updateModel)
+        public async Task<ServiceResponse> UpdateUserAsync(string userId, UserUpdateModel updateModel)
         {
             try
             {
-                // Hent eksisterende bruker basert på e-post eller id
-                var user = await GetUserByEmailAsync(currentEmail); // Eller bruk GetUserByIdAsync hvis du oppdaterer via id
+                // Hent eksisterende bruker basert på userId
+                var user = await GetUserByIdAsync(userId); // Antar at denne metoden henter bruker basert på userId
                 if (user == null)
                 {
                     return new ServiceResponse { Success = false, Message = "User not found." };
@@ -210,14 +210,13 @@ namespace Ignist.Data.Services
                     user.Email = updateModel.NewEmail;
                 }
 
-                // Oppdater dokumentet i Cosmos DB
+                // Oppdater dokumentet i Cosmos DB med den oppdaterte brukeren
                 await _container.ReplaceItemAsync(user, user.Id, new PartitionKey(user.Id));
 
                 return new ServiceResponse { Success = true, Message = "User updated successfully." };
             }
             catch (CosmosException ex)
             {
-                // Logg feilen eller håndter den på egnet måte
                 return new ServiceResponse { Success = false, Message = $"An error occurred: {ex.Message}" };
             }
         }
