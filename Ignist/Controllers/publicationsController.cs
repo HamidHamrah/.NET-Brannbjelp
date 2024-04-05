@@ -20,7 +20,6 @@ namespace Ignist.Controllers
 
         // Get all Publications
         [HttpGet]
-        [Authorize]
         public async Task<ActionResult<List<Publication>>> GetAllPublications()
         {
             try
@@ -33,21 +32,6 @@ namespace Ignist.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving publications. please try again later.");
             }
         }
-
-
-        //Return the last id
-        [HttpGet("last")]
-        public async Task<ActionResult<Publication>> GetLastPublication()
-        {
-            var lastPublication = await _publicationsRepository.GetLastPublicationAsync();
-            if (lastPublication == null)
-            {
-                return NotFound("No publications found.");
-            }
-
-            return Ok(lastPublication.Id);
-        }
-
 
         // Finding a publication with the specific Id
         [HttpGet("{id}")]
@@ -63,6 +47,7 @@ namespace Ignist.Controllers
         }
 
         [HttpPost]
+        [Authorize (Roles ="Admin")]
         public async Task<ActionResult<Publication>> AddPublication(Publication publication)
         {
             await _publicationsRepository.AddPublicationAsync(publication);
@@ -90,6 +75,7 @@ namespace Ignist.Controllers
 
         // Updating a Publication
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Publication>> UpdatePublication(string id, Publication updatedPublication)
         {
             if (string.IsNullOrEmpty(updatedPublication.Id) || updatedPublication.Id != id)
@@ -113,6 +99,7 @@ namespace Ignist.Controllers
 
         // Deleting a publication
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeletePublication(string id, [FromQuery] string UserId)
         {
             try

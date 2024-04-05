@@ -71,6 +71,7 @@ namespace Ignist.Data.Services
                 {
                     Id = Guid.NewGuid().ToString(),
                     UserName = registerModel.UserName,
+                    LastName=registerModel.LastName,
                     Email = registerModel.Email,
                     PasswordHash = _passwordHelper.HashPassword(registerModel.Password)
                 };
@@ -198,6 +199,7 @@ namespace Ignist.Data.Services
                 // Oppdater brukerobjektet med nye verdier
                 user.UserName = updateModel.UserName ?? user.UserName;
                 user.Role = updateModel.Role ?? user.Role;
+                user.LastName = updateModel.LastName ?? user.LastName;
 
                 // Anta at e-postadresse kan endres, og sjekk for potensielle konflikter
                 if (!string.IsNullOrWhiteSpace(updateModel.NewEmail) && updateModel.NewEmail != user.Email)

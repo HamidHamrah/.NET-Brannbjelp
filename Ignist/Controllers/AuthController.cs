@@ -135,7 +135,7 @@ namespace Ignist.Controllers
             }
 
             // Return only safe and necessary user details
-            return Ok(new { user.Id, user.UserName, user.Email });
+            return Ok(new { user.Id, user.UserName, user.LastName, user.Email });
         }
 
 
@@ -155,6 +155,7 @@ namespace Ignist.Controllers
 
 
         [HttpDelete("delete-user/{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteUser(string id)
         {
             try
@@ -174,6 +175,7 @@ namespace Ignist.Controllers
 
 
         [HttpPut("update-user/{userId}")] // Endret for å reflektere at vi nå bruker userId
+        [Authorize]
         public async Task<IActionResult> UpdateUser(string userId, [FromBody] UserUpdateModel updateModel)
         {
             if (string.IsNullOrWhiteSpace(userId) || updateModel == null)

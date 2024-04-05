@@ -11,6 +11,9 @@ namespace Ignist.Models
         [JsonProperty("UserName")]
         public string UserName { get; set; }
 
+        [JsonProperty("LastName")]
+        public string LastName { get; set; }
+
         [JsonProperty("email")]
         public string Email { get; set; }
 
@@ -19,7 +22,6 @@ namespace Ignist.Models
 
         [JsonProperty("Role")]
         public string Role { get; set; } = "Normal"; // Default role
-
 
 
         [JsonProperty("PasswordResetCode")]
