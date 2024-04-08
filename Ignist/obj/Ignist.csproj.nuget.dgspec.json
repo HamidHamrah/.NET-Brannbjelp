@@ -1,25 +1,27 @@
 {
   "format": 1,
   "restore": {
-    "/Users/zulfeqarshiorzadeh/Desktop/Net-Ignist/Ignist/Ignist.csproj": {}
+    "C:\\Users\\hanne\\Source\\Repos\\Net-Ignist\\Ignist\\Ignist.csproj": {}
   },
   "projects": {
-    "/Users/zulfeqarshiorzadeh/Desktop/Net-Ignist/Ignist/Ignist.csproj": {
+    "C:\\Users\\hanne\\Source\\Repos\\Net-Ignist\\Ignist\\Ignist.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/zulfeqarshiorzadeh/Desktop/Net-Ignist/Ignist/Ignist.csproj",
+        "projectUniqueName": "C:\\Users\\hanne\\Source\\Repos\\Net-Ignist\\Ignist\\Ignist.csproj",
         "projectName": "Ignist",
-        "projectPath": "/Users/zulfeqarshiorzadeh/Desktop/Net-Ignist/Ignist/Ignist.csproj",
-        "packagesPath": "/Users/zulfeqarshiorzadeh/.nuget/packages/",
-        "outputPath": "/Users/zulfeqarshiorzadeh/Desktop/Net-Ignist/Ignist/obj/",
+        "projectPath": "C:\\Users\\hanne\\Source\\Repos\\Net-Ignist\\Ignist\\Ignist.csproj",
+        "packagesPath": "C:\\Users\\hanne\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\hanne\\Source\\Repos\\Net-Ignist\\Ignist\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/zulfeqarshiorzadeh/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\hanne\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -32,6 +34,11 @@
           "warnAsError": [
             "NU1605"
           ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -53,6 +60,12 @@
             "Microsoft.Azure.Cosmos": {
               "target": "Package",
               "version": "[3.38.1, )"
+            },
+            "Microsoft.CodeAnalysis.Analyzers": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[3.3.3, )"
             },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
@@ -104,7 +117,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.101/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

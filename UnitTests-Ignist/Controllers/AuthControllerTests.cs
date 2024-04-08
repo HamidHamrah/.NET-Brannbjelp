@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
@@ -8,7 +9,10 @@ using Ignist.Controllers;
 using Ignist.Data;
 using Ignist.Data.Services;
 using Ignist.Models;
+using Ignist.Models.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 
@@ -283,5 +287,139 @@ public class AuthControllerTests
         var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
         var responseString = notFoundResult.Value.ToString();
         Assert.Equal("{ message = User not registered. }", responseString);
+    }
+
+    [Fact]
+    public async Task TestResetPassword_Positive()
+    {
+        //simulerer en request for å endre/reset passord
+        //setter opp testen til å returnere at passord oppdateres vellykket og
+        //sjekker at metoden returnerer forventet tilbakemelding og er av typen
+        //OkObjectResult
+
+        //arrange
+        var resetPasswordRequest = new Ignist.Models.Authentication.ResetPasswordRequest { 
+            Code = "998877", 
+            Email = "hanne-lf@hotmail.com",
+            NewPassword = "newPassword",
+            ConfirmPassword = "newPassword"
+        };
+        var mockCosmosDbService = new Mock<ICosmosDbService>();
+        mockCosmosDbService.Setup(repo => repo.HandleResetPasswordAsync(resetPasswordRequest))
+            .ReturnsAsync("Password has been successfully reset.");
+        var authController = new AuthController(mockCosmosDbService.Object);
+
+        //act
+        var result = await authController.ResetPassword(resetPasswordRequest);
+
+        //assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        Assert.Equal("Password has been successfully reset.", okResult.Value);
+    }
+
+    [Fact]
+    public async Task TestResetPassword_Negative_BadRequest()
+    {
+        //Testen simulerer en request for å resette passord som ikke er gyldig
+        //Sjekker at metoden håndterer dette ved å gi feilmelding og returnere
+        //resultat av typen BadRequest
+
+        //arrange
+        var resetPasswordRequest = new Ignist.Models.Authentication.ResetPasswordRequest
+        {
+            Code = "998877",
+            Email = "hanne-lf@hotmail.com"
+        };
+        var mockCosmosDbService = new Mock<ICosmosDbService>();
+        mockCosmosDbService.Setup(repo => repo.HandleResetPasswordAsync(resetPasswordRequest))
+            .ReturnsAsync("Didnt work");
+        var authController = new AuthController(mockCosmosDbService.Object);
+
+        //act
+        var result = await authController.ResetPassword(resetPasswordRequest);
+
+        //assert
+        var badResult = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal("Didnt work", badResult.Value);
+    }
+
+    [Fact]
+    public async Task TestUpdatePassword_Positive()
+    {
+        //Testen simulerer et scenario hvor en bruker vil oppdatere passordet sitt.
+        //I arrange-delen opprettes testdata som trengs, en brukeridentitet og en epostadresse
+        //Kaller deretter metoden med testdataene i act-delen
+        //I assert sjekkes det at metoden leverer det som er forventet, som er at det
+        //returneres en "OkObjectREsult" og melding om at passordet ble oppdatert
+
+        //arrange
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Email, "hanne-lf@hotmail.com")
+        };
+        var identity = new ClaimsIdentity(claims, "TestAuth");
+        var user = new ClaimsPrincipal(identity);
+        var updatePassword = new UpdatePasswordModel { 
+            OldPassword = "oldPassword", 
+            NewPassword = "newPassword", 
+            ConfirmNewPassword = "newPassword"};
+
+        var mockCosmosDbService = new Mock<ICosmosDbService>();
+        mockCosmosDbService.Setup(repo => repo.UpdateUserPasswordAsync(It.IsAny<string>(), 
+            It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync("Password updated successfully.");
+
+        var authController = new AuthController(mockCosmosDbService.Object);
+        authController.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = user }
+            };
+
+        //act
+        var result = await authController.UpdatePassword(updatePassword);
+
+        //assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        Assert.Equal("Password updated successfully.", okResult.Value);
+    }
+
+    [Fact]
+    public async Task TestUpdatePassword_Negative_InvalidModelState()
+    {
+        //Testen simulerer et scenario hvor modelstate ikke er gyldig, confirmpassord er ikke
+        //lik som newpassword. Lagt til model-feil ved å kalle AddModelError i arrange-delen
+        //Verifiserer at resultatet av updatePassword er en BadRequest med modell-feil (SerializableError)
+
+        //arrange
+        var updatePasswordModel = new UpdatePasswordModel() {
+            OldPassword = "oldPassword",
+            NewPassword = "newPassword",
+            ConfirmNewPassword = "newPassword1"
+        };
+        var authController = new AuthController(new Mock<ICosmosDbService>().Object);
+        authController.ModelState.AddModelError("ConfirmedPassword", "Something is wrong.");
+
+        //act
+        var result = await authController.UpdatePassword(updatePasswordModel);
+
+        //assert
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.IsType<SerializableError>(badRequest.Value);
+    }
+
+    [Fact]
+    public async Task TestUpdatePassword_Negative_InvalidToken() 
+    { 
+        //arrange
+        //act
+        //assert
+    }
+
+    [Fact]
+    public async Task TestUpdatePassword_Negative_BadRequest()
+    {
+        //arrange
+        //act
+        //assert
     }
 }

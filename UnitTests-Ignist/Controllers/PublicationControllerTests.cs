@@ -88,6 +88,7 @@ public class PublicationControllerTests
         Assert.Equal("An error occurred while retrieving publications. please try again later.", statusCodeResult.Value);
     }
 
+    /* -- kommentert ut to tester som var skrevet for metoder som nå er sletta i controlleren
     [Fact]
     public async Task TestGetLastPublication_Positive()
     {
@@ -137,6 +138,7 @@ public class PublicationControllerTests
         var notFoundObjectResult = Assert.IsType<NotFoundObjectResult>(result.Result);
         Assert.Equal(404, notFoundObjectResult.StatusCode);
     }
+    */
 
     [Fact]
     public async Task TestGetPublication_Positive()
