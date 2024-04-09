@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,10 +12,14 @@ using Ignist.Data.Services;
 using Ignist.Models;
 using Ignist.Models.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Serialization.HybridRow;
 using Moq;
+using User = Ignist.Models.User;
 
 namespace UnitTests_Ignist.Controllers;
 
@@ -409,17 +414,321 @@ public class AuthControllerTests
 
     [Fact]
     public async Task TestUpdatePassword_Negative_InvalidToken() 
-    { 
+    {
+        //simulerer et scenrio hvor epost-adresse er tom og ikke gyldig
+        //sjekker at metoden gir et resultat av type UnauthorizedObjectResul som forventet
+        //og gir feilmelding "Invalid Token"
+
+        //arrange
+        var userEmail = ""; 
+        var updatePasswordModel = new UpdatePasswordModel()
+        {
+            OldPassword = "oldPassword",
+            NewPassword = "newPassword",
+            ConfirmNewPassword = "newPassword"
+        };
+        var mockCosmosDbService = new Mock<ICosmosDbService>();
+        var authController = new AuthController(mockCosmosDbService.Object);
+
+        var identity = new ClaimsIdentity();
+        var claimsPrincipal = new ClaimsPrincipal(identity);
+        authController.ControllerContext = new ControllerContext()
+        {
+            HttpContext = new DefaultHttpContext() { User = claimsPrincipal }
+        };
+
+        //act
+        var result = await authController.UpdatePassword(updatePasswordModel);
+
+        //assert
+        var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
+        Assert.Equal("Invalid token.", unauthorizedResult.Value);
+    }
+
+    [Fact]
+    public async Task TestUpdatePassword_Negative_BadRequest()
+    {
+        //Testen skal simulere et scenario hvor bruker har kommet helt til siste steg, men
+        //noe feiler i selve oppdateringen av passordet. Altså ikke ugyldig epost eller bruker
+        //men noe annet som går galt. 
+        //sjekker at metoden da returnerer en badrequest 
+
+        //arrange
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.Email, "hanne-lf@hotmail.com")
+        };
+        var identity = new ClaimsIdentity(claims, "TestAuth");
+        var user = new ClaimsPrincipal(identity);
+        var updatePassword = new UpdatePasswordModel
+        {
+            OldPassword = "oldPassword",
+            NewPassword = "newPassword",
+            ConfirmNewPassword = "newPassword"
+        };
+
+        var mockCosmosDbService = new Mock<ICosmosDbService>();
+        mockCosmosDbService.Setup(repo => repo.UpdateUserPasswordAsync(It.IsAny<string>(),
+            It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync("Bad request.");
+
+        var authController = new AuthController(mockCosmosDbService.Object);
+        authController.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext { User = user }
+        };
+
+        //act
+        var result = await authController.UpdatePassword(updatePassword);
+
+        //assert
+        var badResult = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal("Bad request.", badResult.Value);
+    }
+
+    //Testen feiler - det er ikke av typen User som returneres av metoden
+    [Fact]
+    public async Task TestAboutMe_Positive()
+    {
+        //Testen oppretter en gyldig bruker og setter opp slik at metoden returnerer denne
+        //brukeren. I Assert sjekkes det om metoden returnerer en OkObjectResult-respons og
+        //at det er av typen User som returneres. Sjekker deretter om verdiene i brukeren 
+        //som returneres er like som i brukeren vi opprettet i Arrange. 
+        
+        //arrange
+        var user = new Ignist.Models.User
+        {
+            Email = "hanne-lf@hotmail.com",
+            LastName = "Broen",
+            UserName = "hannelf",
+            Id = "926"
+        };
+        var mockCosmosDbService = new Mock<ICosmosDbService>();
+        mockCosmosDbService.Setup(repo => repo.GetUserByIdAsync(user.Id)).ReturnsAsync(user);
+        var authController = new AuthController(mockCosmosDbService.Object);
+
+        //act
+        var result = await authController.AboutMe(user.Id);
+
+        //assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var userModel = Assert.IsType<Ignist.Models.User>(okResult.Value);
+        Assert.Equal(user.Id, userModel.Id);
+        Assert.Equal(user.UserName, userModel.UserName);
+        Assert.Equal(user.LastName, userModel.LastName);
+        Assert.Equal(user.Email, userModel.Email);
+    }
+
+    [Fact]
+    public async Task TestAboutMe_Negative_IdIsNull()
+    {
+        //Testen simulerer et scenario hvor id er en tom streng 
+        //Setter opp db til å ta inn denne tomme id'en og returnere en tom bruker 
+        //I assert sjekkes det at resultatet er en BadRequest og at korrekt feilmelding gis
+
+        //arrange
+        var id = "";
+        var emptyUser = new Ignist.Models.User();
+        var mockCosmosDbService = new Mock<ICosmosDbService>();
+        mockCosmosDbService.Setup(repo => repo.GetUserByIdAsync(id))
+            .ReturnsAsync(emptyUser);
+        var authController = new AuthController(mockCosmosDbService.Object);
+
+        //act
+        var result = await authController.AboutMe(id);
+
+        //assert
+        var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal("ID is required.", badRequest.Value);
+    }
+
+    [Fact]
+    public async Task TestAboutMe_Negative_UserNotFound_EmptyUser()
+    {
+        //testen simulerer et scenario hvor brukeren ikke finnes i databasen
+        //sjekker at metoden returnerer notFound og korrekt feilmelding
+
+        //arrange
+        var id = "123";
+        var mockCosmosDbService = new Mock<ICosmosDbService>();
+        mockCosmosDbService.Setup(repo => repo.GetUserByIdAsync(id))
+            .ReturnsAsync((User)null);
+        var authController = new AuthController(mockCosmosDbService.Object);
+
+        //act
+        var result = await authController.AboutMe(id);
+
+        //assert
+        var badRequest = Assert.IsType<NotFoundObjectResult>(result);
+        Assert.Equal("User not found.", badRequest.Value);
+        
+    }
+
+    [Fact]
+    public async Task TestGetAllUsers_Positive()
+    {
+        //Setter opp en test med to brukere 
+        //Sjekker at metoden returnerer en liste med typen Users og at det er 2
+        //brukere i denne listen og at brukerene er de samme som ble opprettet i arrange
+
+        //arrange
+        var users = new List<User>()
+            {
+                new User
+                {
+                    Id = "1",
+                    UserName = "Brukernavn",
+                    LastName = "Bojang",
+                    Email = "example@example.com"
+                },
+                new User
+                {
+                    Id = "2",
+                    UserName = "Bruker 2",
+                    LastName = "Felix",
+                    Email = "felix@example.com"
+                }
+            };
+
+        var mockCosmosDbService = new Mock<ICosmosDbService>();
+        mockCosmosDbService.Setup(repo => repo.GetAllUsersAsync())
+            .ReturnsAsync(users);
+
+        var authController = new AuthController(mockCosmosDbService.Object);
+
+        //act
+        var result = await authController.GetAllUsers();
+
+        //assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var actualUsers = Assert.IsType<List<User>>(okResult.Value);
+        Assert.Equal(2, actualUsers.Count);
+        Assert.Equal(users, actualUsers);
+    }
+
+
+    [Fact]
+    public async Task TestGetAllUsers_Negative()
+    {
+        //Sjekker at metoden håndterer feil ved henting av brukere
+        //Testen fremprovoserer en exception og sjekker at metoden kaster exception og 
+        //gir feilmelding. 
+
+        //arrange
+        var mockCosmosDbService = new Mock<ICosmosDbService>();
+        mockCosmosDbService.Setup(repo => repo.GetAllUsersAsync())
+            .ThrowsAsync(new Exception("Mocked exception"));
+
+        var authController = new AuthController(mockCosmosDbService.Object);
+
+        //act
+        var result = await authController.GetAllUsers();
+
+        //assert
+        var statusCodeResult = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal(StatusCodes.Status400BadRequest, statusCodeResult.StatusCode);
+        Assert.Equal("An error occurred while retrieving users: Mocked exception", statusCodeResult.Value);
+    }
+
+    [Fact]
+    public async Task TestDeleteUser_Positive()
+    {
+        //setter opp scenario for sletting av en bruker
+        //verifiserer at slette-metoden kalles med korrekt id
+        //sjekker at metoden returnerer OkObjectResult og melding om at bruker er slettet suksessfult
+
+        //arrange
+        var id = "123";
+        var mockCosmosDbService = new Mock<ICosmosDbService>();
+        mockCosmosDbService.Setup(repo => repo.DeleteUserAsync(id)).Verifiable(); //sjekker at metoden blir kalt med riktig id
+        var authController = new AuthController(mockCosmosDbService.Object);
+
+        //act
+        var result = await authController.DeleteUser(id);
+
+        //assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        Assert.Equal("User deleted successfully.", okResult.Value);
+        mockCosmosDbService.Verify(); //sjekker at DeleteUserAsync blir kalt med riktig id
+    }
+
+    [Fact]
+    public async Task TestDeleteUser_Negative_NotFound()
+    {
+        //Setter opp et scenario hvor metoden ikke finner brukeren 
+        //Sjekker at metoden håndterer dette med korrekt feilmelding og NotFound-result
+
+        //arrange
+        var id = "1";
+        var mockCosmosDbService = new Mock<ICosmosDbService>();
+        mockCosmosDbService.Setup(repo => repo.DeleteUserAsync(id))
+            .ThrowsAsync(new ArgumentException("User not found"));
+
+        var authController = new AuthController(mockCosmosDbService.Object);
+
+        //act
+        var result = await authController.DeleteUser(id);
+
+        //assert
+        var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+        Assert.Equal("User not found", notFoundResult.Value);
+    }
+
+    [Fact]
+    public async Task TestDeleteUser_Negative_BadRequest()
+    {
+        //Setter opp scenario som fremprovoserer et Exception med en exception-melding
+        //Sjekker i Assert at metoden returnerer denne meldingen og returnerer en BadRequest
+        
+        //arrange
+        var id = "4443";
+        var exceptionMessage = "Internal server error";
+        var mockCosmosDbService = new Mock<ICosmosDbService>();
+        mockCosmosDbService.Setup(repo => repo.DeleteUserAsync(id))
+            .ThrowsAsync(new Exception(exceptionMessage)); 
+
+        var authController = new AuthController(mockCosmosDbService.Object);
+
+        //act
+        var result = await authController.DeleteUser(id);
+
+        //assert
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal($"An error occurred: {exceptionMessage}", badRequestResult.Value);
+
+    }
+
+    [Fact]
+    public async Task TestUpdateUser_Positive()
+    {
         //arrange
         //act
         //assert
     }
 
     [Fact]
-    public async Task TestUpdatePassword_Negative_BadRequest()
+    public async Task TestUpdateUser_Negative_UserIdEmpty()
     {
         //arrange
         //act
         //assert
     }
+
+    [Fact]
+    public async Task TestUpdateUser_Negative_UpdateModelEmpty()
+    {
+        //arrange
+        //act
+        //assert
+    }
+
+    [Fact]
+    public async Task TestUpdateUser_Negative_ErrorDuringUpdate()
+    {
+        //arrange
+        //act
+        //assert
+    }
+
 }
+

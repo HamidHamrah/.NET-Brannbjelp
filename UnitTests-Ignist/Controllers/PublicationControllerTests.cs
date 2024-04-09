@@ -51,7 +51,7 @@ public class PublicationControllerTests
 
         var mockPublicationRepository = new Mock<IPublicationsRepository>();
         mockPublicationRepository.Setup(repo => repo.GetAllPublicationsAsync())
-        .ReturnsAsync(publicationList);
+            .ReturnsAsync(publicationList);
 
         var publicationController = new PublicationsController(mockPublicationRepository.Object);
 
@@ -75,7 +75,7 @@ public class PublicationControllerTests
         //arrange
         var mockPublicationRepository = new Mock<IPublicationsRepository>();
         mockPublicationRepository.Setup(repo => repo.GetAllPublicationsAsync())
-                      .ThrowsAsync(new Exception("Mocked exception"));
+            .ThrowsAsync(new Exception("Mocked exception"));
 
         var publicationController = new PublicationsController(mockPublicationRepository.Object);
 
@@ -89,6 +89,7 @@ public class PublicationControllerTests
     }
 
     /* -- kommentert ut to tester som var skrevet for metoder som nå er sletta i controlleren
+    
     [Fact]
     public async Task TestGetLastPublication_Positive()
     {
@@ -230,7 +231,7 @@ public class PublicationControllerTests
         var userId = "user123";
         var mockPublicationRepository = new Mock<IPublicationsRepository>();
         mockPublicationRepository.Setup(repo => repo.DeletePublicationAsync(It.IsAny<string>(), It.IsAny<string>()))
-                                  .ThrowsAsync(new CosmosException("Publication not found.", HttpStatusCode.NotFound, 404, "Not Found", 0));
+            .ThrowsAsync(new CosmosException("Publication not found.", HttpStatusCode.NotFound, 404, "Not Found", 0));
 
         var publicationController = new PublicationsController(mockPublicationRepository.Object);
 
@@ -383,7 +384,7 @@ public class PublicationControllerTests
 
         var mockPublicationRepository = new Mock<IPublicationsRepository>();
         mockPublicationRepository.Setup(repo => repo.UpdatePublicationAsync(updatedPublication))
-                      .ThrowsAsync(new CosmosException("Publication not found.", HttpStatusCode.NotFound, 404, "", 1.0));
+            .ThrowsAsync(new CosmosException("Publication not found.", HttpStatusCode.NotFound, 404, "", 1.0));
 
         var publicationController = new PublicationsController(mockPublicationRepository.Object);
 
