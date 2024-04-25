@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using Ignist.Data.EmailServices;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -48,6 +49,11 @@ builder.Services.AddCors(publications => publications.AddPolicy("corspolicy", bu
     build.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
 }));
 
+Log.Logger = new LoggerConfiguration()
+           .MinimumLevel.Debug() // Set the minimum log level
+           .WriteTo.Console() // Log to console
+           .WriteTo.File("Logs/log.txt", rollingInterval: RollingInterval.Day) // Log to file with daily rolling
+           .CreateLogger();
 
 
 //kode for å sende linl til reset passord

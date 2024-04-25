@@ -1,0 +1,11 @@
+2024-04-25 13:29:21.811 +02:00 [INF] Received login request for s362052@oslomet.no
+2024-04-25 13:29:21.825 +02:00 [DBG] Attempting to authenticate user s362052@oslomet.no
+2024-04-25 13:29:22.760 +02:00 [INF] User s362052@oslomet.no logged in successfully
+2024-04-25 13:29:30.867 +02:00 [INF] Initiating request to retrieve all users.
+2024-04-25 13:29:30.930 +02:00 [INF] Successfully retrieved user data.
+2024-04-25 13:29:30.992 +02:00 [INF] Initiating request to retrieve all users.
+2024-04-25 13:29:31.081 +02:00 [INF] Successfully retrieved user data.
+2024-04-25 13:29:35.456 +02:00 [INF] Request received to delete user with ID 817fc9af-854a-43ba-aa2a-bb7779dafabf
+2024-04-25 13:29:35.618 +02:00 [INF] User with ID 817fc9af-854a-43ba-aa2a-bb7779dafabf deleted successfully.
+2024-04-25 13:39:12.394 +02:00 [INF] Admin Hamid2 attempting to add a new publication
+2024-04-25 13:39:12.555 +02:00 [INF] Publication with ID 8708 added successfully
