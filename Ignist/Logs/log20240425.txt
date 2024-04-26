@@ -9,3 +9,37 @@
 2024-04-25 13:29:35.618 +02:00 [INF] User with ID 817fc9af-854a-43ba-aa2a-bb7779dafabf deleted successfully.
 2024-04-25 13:39:12.394 +02:00 [INF] Admin Hamid2 attempting to add a new publication
 2024-04-25 13:39:12.555 +02:00 [INF] Publication with ID 8708 added successfully
+2024-04-25 13:54:51.226 +02:00 [INF] Received request for 'AboutMe' with ID 9223158e-8769-408b-a4ce-c1378ac0ae6b
+2024-04-25 13:54:51.240 +02:00 [DBG] Looking up user by ID 9223158e-8769-408b-a4ce-c1378ac0ae6b
+2024-04-25 13:54:52.052 +02:00 [INF] User found for ID 9223158e-8769-408b-a4ce-c1378ac0ae6b: returning basic user details.
+2024-04-25 13:54:52.063 +02:00 [INF] Received request for 'AboutMe' with ID 9223158e-8769-408b-a4ce-c1378ac0ae6b
+2024-04-25 13:54:52.063 +02:00 [DBG] Looking up user by ID 9223158e-8769-408b-a4ce-c1378ac0ae6b
+2024-04-25 13:54:52.120 +02:00 [INF] User found for ID 9223158e-8769-408b-a4ce-c1378ac0ae6b: returning basic user details.
+2024-04-25 13:54:56.184 +02:00 [INF] Initiating request to retrieve all users.
+2024-04-25 13:54:56.355 +02:00 [INF] Successfully retrieved user data.
+2024-04-25 13:54:56.388 +02:00 [INF] Initiating request to retrieve all users.
+2024-04-25 13:54:56.449 +02:00 [INF] Successfully retrieved user data.
+2024-04-25 13:55:01.152 +02:00 [INF] Received request for 'AboutMe' with ID 9223158e-8769-408b-a4ce-c1378ac0ae6b
+2024-04-25 13:55:01.152 +02:00 [DBG] Looking up user by ID 9223158e-8769-408b-a4ce-c1378ac0ae6b
+2024-04-25 13:55:01.203 +02:00 [INF] User found for ID 9223158e-8769-408b-a4ce-c1378ac0ae6b: returning basic user details.
+2024-04-25 13:55:01.241 +02:00 [INF] Received request for 'AboutMe' with ID 9223158e-8769-408b-a4ce-c1378ac0ae6b
+2024-04-25 13:55:01.241 +02:00 [DBG] Looking up user by ID 9223158e-8769-408b-a4ce-c1378ac0ae6b
+2024-04-25 13:55:01.338 +02:00 [INF] User found for ID 9223158e-8769-408b-a4ce-c1378ac0ae6b: returning basic user details.
+2024-04-25 13:55:18.071 +02:00 [INF] Admin Hamid2 attempting to delete publication with ID 7667
+2024-04-25 13:55:18.165 +02:00 [INF] Publication with ID 7667 deleted successfully by Admin Hamid2
+2024-04-25 13:55:21.132 +02:00 [INF] Admin Hamid2 attempting to delete publication with ID 8708
+2024-04-25 13:55:21.258 +02:00 [INF] Publication with ID 8708 deleted successfully by Admin Hamid2
+2024-04-25 14:11:03.872 +02:00 [INF] Initiating request to retrieve all users.
+2024-04-25 14:11:03.936 +02:00 [INF] Successfully retrieved user data.
+2024-04-25 14:11:03.989 +02:00 [INF] Initiating request to retrieve all users.
+2024-04-25 14:11:04.133 +02:00 [INF] Successfully retrieved user data.
+2024-04-25 14:11:05.008 +02:00 [INF] Received request for 'AboutMe' with ID 9223158e-8769-408b-a4ce-c1378ac0ae6b
+2024-04-25 14:11:05.009 +02:00 [DBG] Looking up user by ID 9223158e-8769-408b-a4ce-c1378ac0ae6b
+2024-04-25 14:11:05.055 +02:00 [INF] User found for ID 9223158e-8769-408b-a4ce-c1378ac0ae6b: returning basic user details.
+2024-04-25 14:11:05.090 +02:00 [INF] Received request for 'AboutMe' with ID 9223158e-8769-408b-a4ce-c1378ac0ae6b
+2024-04-25 14:11:05.090 +02:00 [DBG] Looking up user by ID 9223158e-8769-408b-a4ce-c1378ac0ae6b
+2024-04-25 14:11:05.214 +02:00 [INF] User found for ID 9223158e-8769-408b-a4ce-c1378ac0ae6b: returning basic user details.
+2024-04-25 14:11:09.885 +02:00 [INF] Initiating request to retrieve all users.
+2024-04-25 14:11:09.993 +02:00 [INF] Successfully retrieved user data.
+2024-04-25 14:11:10.005 +02:00 [INF] Initiating request to retrieve all users.
+2024-04-25 14:11:10.057 +02:00 [INF] Successfully retrieved user data.
