@@ -117,10 +117,9 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 //This for Cors(Hamid)
 app.UseCors("corspolicy"); //Using the Cors to in app
